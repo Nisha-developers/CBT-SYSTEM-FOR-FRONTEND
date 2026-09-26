@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSchoolStore } from '../../store/useSchoolStore';
 import Button from '../../components/common/Button';
+import Steps from '../../components/common/Steps';
 
 // Arms belong to a class (e.g. SS2 -> A, B). Depends on classes from Step 3.
 export default function Step2Arms() {
@@ -26,10 +27,12 @@ export default function Step2Arms() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
-        <h1 className="text-xl font-semibold mb-1">School Setup</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 flex-col">
+       <h1 className="text-xl font-extrabold mb-9 text-blue-600">School Setup</h1>
+       <Steps activeStep={4} />
         <p className="text-sm text-gray-500 mb-6">Step 3 of 4 — Arms per class (e.g. A, B, Science)</p>
+      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
+       
 
         {wizard.classes.length === 0 ? (
           <p className="text-sm text-red-500 mb-4">Add classes first (previous step).</p>
@@ -64,10 +67,11 @@ export default function Step2Arms() {
             </li>
           ))}
         </ul>
-
-        <Button className="w-full" onClick={() => navigate('/school-setup/subjects')}>
-          Continue
+<div className="flex justify-end">
+        <Button className="" onClick={() => navigate('/school-setup/subjects')}>
+         Next
         </Button>
+        </div>
       </div>
     </div>
   );

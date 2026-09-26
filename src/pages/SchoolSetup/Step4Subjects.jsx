@@ -38,10 +38,10 @@ export default function Step4Subjects() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center flex-col bg-gray-50">
+      <h1 className="text-xl font-extrabold mb-9 text-blue-600">School Setup</h1>
+        <p className="text-sm text-gray-500 mb-6">Subjects for Each Class</p>
       <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
-        <h1 className="text-xl font-semibold mb-1">School Setup</h1>
-        <p className="text-sm text-gray-500 mb-6">Step 4 of 4 — Subjects</p>
         {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
         <div className="flex gap-2 mb-4">

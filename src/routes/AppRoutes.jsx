@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate} from 'react-router-dom';
+import { useEffect } from 'react';
 import ProtectedRoute from './ProtectedRoute';
 
 import Homepage from '../pages/Homepage';
@@ -34,12 +35,23 @@ import TakeExam from '../pages/Student/TakeExam';
 import MyResults from '../pages/Student/MyResults';
 
 export default function AppRoutes() {
+  const schoolSetupCompleted = localStorage.getItem('schoolSetupCompleted') === true;
+  const navigate = useNavigate();
+   useEffect(() => {
+    if (!schoolSetupCompleted) {
+      navigate('/school-setup/info');
+    }
+  }, [schoolSetupCompleted]);
+  const question1 = ['name', 'motto', 'address', 'phone'];
+  const question2 = ['email', 'HeadLine', 'Description', 'LogoUrl'];
+
   return (
     <Routes>
       {/* Public */}
       <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/school-setup/info" element={<Step1SchoolInfo />} />
+      <Route path="/school-setup/info" element={<Step1SchoolInfo fields={question1} />} />
+      <Route path="/school-setup/info2" element={<Step1SchoolInfo fields={question2} />} />
       <Route path="/school-setup/classes" element={<Step3Classes />} />
       <Route path="/school-setup/arms" element={<Step2Arms />} />
       <Route path="/school-setup/subjects" element={<Step4Subjects />} />

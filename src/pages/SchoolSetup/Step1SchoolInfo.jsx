@@ -1,19 +1,28 @@
 import { useNavigate } from 'react-router-dom';
 import { useSchoolStore } from '../../store/useSchoolStore';
 import Button from '../../components/common/Button';
+import Steps from '../../components/common/Steps';
+import { useEffect } from 'react';
 
-const fields = ['name', 'motto', 'address', 'phone', 'email'];
 
-export default function Step1SchoolInfo() {
+
+export default function Step1SchoolInfo({fields}) {
+  
   const navigate = useNavigate();
+ const determinPath = fields.includes('phone') ? '/school-setup/info2' : '/school-setup/classes';
+
+ console.log(determinPath);
   const { wizard, setWizardStep } = useSchoolStore();
   const info = wizard.info;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
-        <h1 className="text-xl font-semibold mb-1">School Setup</h1>
-        <p className="text-sm text-gray-500 mb-6">Step 1 of 4 — School Information</p>
+    <div className="min-h-screen bg-gray-50">
+      <h1 className="text-xl font-extrabold mb-1 text-center  text-blue-600 pt-8 pb-4">School Setup</h1>
+        {/* <p className="text-sm text-gray-500 mb-6">Step 1 of 4School Information</p> */}
+        <p className='text-gray-600 text-sm text-center mb-3'>Basic School Information</p>
+        <Steps activeStep={determinPath.includes('info2') ? 1 : 2} />
+      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md mx-auto">
+       
 
         {fields.map((field) => (
           <div key={field} className="mb-4">
@@ -26,10 +35,11 @@ export default function Step1SchoolInfo() {
           </div>
         ))}
         {/* Logo upload wiring goes here — store the file/URL in wizard.info.logoUrl */}
-
-        <Button className="w-full" onClick={() => navigate('/school-setup/classes')}>
-          Continue
+<div className="flex justify-end">
+        <Button className="" onClick={() => navigate(determinPath)}>
+          Next
         </Button>
+        </div>
       </div>
     </div>
   );
