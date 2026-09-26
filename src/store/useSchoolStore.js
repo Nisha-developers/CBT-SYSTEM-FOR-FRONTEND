@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from "zustand/middleware";
 
 // School-setup wizard state (Steps 1-4) + the loaded school record
 // once setup is complete.

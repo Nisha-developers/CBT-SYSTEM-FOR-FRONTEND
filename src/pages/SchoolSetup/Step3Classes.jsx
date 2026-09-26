@@ -17,11 +17,11 @@ export default function Step3Classes() {
   const removeClass = (name) => setWizardStep('classes', wizard.classes.filter((c) => c !== name));
 
   return (
-    <div className="min-h-screen flex items-center flex-col justify-center bg-gray-50">
-        <h1 className="text-xl font-extrabold mb-9 text-blue-600">School Setup</h1>
-    <Steps activeStep={3} />
+    <div className="min-h-screen flex items-center flex-col  bg-gray-50 mt-14">
+      
+    <Steps activeStep={3} textContent = 'Classes(Eg: JSS1, SS2)' />
    
-        <p className="text-sm text-gray-500 mb-6">Classes(Eg: JSS1, SS2)</p>
+       
       <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
     
         <div className="flex gap-2 mb-4">

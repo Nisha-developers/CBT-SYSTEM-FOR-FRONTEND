@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSchoolStore } from '../../store/useSchoolStore';
 import { setupSchool as setupSchoolApi } from '../../api/school.api';
 import Button from '../../components/common/Button';
+import Steps from '../../components/common/Steps';
 
 export default function Step4Subjects() {
   const navigate = useNavigate();
@@ -38,10 +39,10 @@ export default function Step4Subjects() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center flex-col bg-gray-50">
-      <h1 className="text-xl font-extrabold mb-9 text-blue-600">School Setup</h1>
-        <p className="text-sm text-gray-500 mb-6">Subjects for Each Class</p>
-      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
+    <div className="min-h-screen flex items-center flex-col bg-gray-50 ">
+     <Steps activeStep={5} textContent = 'Subjects (e.g. Mathematics, English)' />
+       
+      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md mt-14">
         {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
         <div className="flex gap-2 mb-4">

@@ -27,11 +27,10 @@ export default function Step2Arms() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 flex-col">
-       <h1 className="text-xl font-extrabold mb-9 text-blue-600">School Setup</h1>
-       <Steps activeStep={4} />
-        <p className="text-sm text-gray-500 mb-6">Step 3 of 4 — Arms per class (e.g. A, B, Science)</p>
-      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
+    <div className="min-h-screen flex items-center  bg-gray-50 flex-col">
+      
+       <Steps activeStep={4} textContent = 'Arms per class (e.g. A, B, Science)' />
+      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md mt-14">
        
 
         {wizard.classes.length === 0 ? (

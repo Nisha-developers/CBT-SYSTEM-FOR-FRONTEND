@@ -17,11 +17,11 @@ export default function Step1SchoolInfo({fields}) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <h1 className="text-xl font-extrabold mb-1 text-center  text-blue-600 pt-8 pb-4">School Setup</h1>
+      
         {/* <p className="text-sm text-gray-500 mb-6">Step 1 of 4School Information</p> */}
-        <p className='text-gray-600 text-sm text-center mb-3'>Basic School Information</p>
-        <Steps activeStep={determinPath.includes('info2') ? 1 : 2} />
-      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md mx-auto">
+       
+        <Steps activeStep={determinPath.includes('info2') ? 1 : 2}  textContent = 'School Information'/>
+      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md mx-auto mt-14">
        
 
         {fields.map((field) => (
