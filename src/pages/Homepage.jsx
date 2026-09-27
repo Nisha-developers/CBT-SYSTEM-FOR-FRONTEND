@@ -8,9 +8,13 @@ export default function Homepage() {
   const [checking, setChecking] = useState(false);
     const schooDetail =JSON.parse(localStorage.getItem('setupSchoolApi'));
     console.log(schooDetail?.name);
-    if(!schooDetail?.name){
+    
+    
+    useEffect(()=>{
+if(!schooDetail?.name){
   navigate('/school-setup/info')
-    }
+  }
+    }, [schooDetail?.name])
 
   // "Get Started" decides Login vs School Setup based on the backend,
   // never the frontend alone (Section 3 of the architecture).
