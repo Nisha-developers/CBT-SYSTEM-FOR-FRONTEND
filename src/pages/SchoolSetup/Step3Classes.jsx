@@ -23,7 +23,9 @@ export default function Step3Classes() {
    
        
       <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
-    
+    <Button className="mb-8" onClick={() => navigate('/school-setup/info2')}>
+              Prev
+            </Button>
         <div className="flex gap-2 mb-4">
           <input
             className="flex-1 border rounded-md px-3 py-2 text-sm"

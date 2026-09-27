@@ -32,7 +32,9 @@ export default function Step2Arms() {
        <Steps activeStep={4} textContent = 'Arms per class (e.g. A, B, Science)' />
       <div className="bg-white p-8 rounded-lg shadow w-full max-w-md mt-14">
        
-
+     <Button className="mb-8" onClick={() => navigate('/school-setup/classes')}>
+              Prev
+            </Button>
         {wizard.classes.length === 0 ? (
           <p className="text-sm text-red-500 mb-4">Add classes first (previous step).</p>
         ) : (

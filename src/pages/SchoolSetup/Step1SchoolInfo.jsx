@@ -22,18 +22,79 @@ export default function Step1SchoolInfo({fields}) {
        
         <Steps activeStep={determinPath.includes('info2') ? 1 : 2}  textContent = 'School Information'/>
       <div className="bg-white p-8 rounded-lg shadow w-full max-w-md mx-auto mt-14">
+        {
+         !(determinPath.includes('info2')) && (
+            <Button className="mb-4" onClick={() => navigate('/school-setup/info')}>
+              Prev
+            </Button>
+          )
+        }
        
 
         {fields.map((field) => (
-          <div key={field} className="mb-4">
+          field !== 'Logo' && field !== 'Description' && (
+             <div key={field} className="mb-4">
             <label className="block text-sm mb-1 capitalize">{field}</label>
+            
             <input
               className="w-full border rounded-md px-3 py-2 text-sm"
               value={info[field] || ''}
               onChange={(e) => setWizardStep('info', { ...info, [field]: e.target.value })}
             />
+           
           </div>
+          )
         ))}
+        {/* Logo upload */}
+{fields.includes('Logo') && (
+  <div className="mb-4">
+    <label className="block text-sm mb-1">
+      Logo
+    </label>
+
+    <input
+      type="file"
+      accept="image/*"
+      className="w-full border rounded-md px-3 py-2 text-sm"
+      onChange={(e) => {
+        const file = e.target.files[0];
+
+        if (file) {
+          const reader = new FileReader();
+
+          reader.onload = (event) => {
+            setWizardStep('info', {
+              ...info,
+              logoUrl: event.target.result
+            });
+          };
+
+          reader.readAsDataURL(file);
+        }
+      }}
+    />
+
+    {/* Preview */}
+    {info.logoUrl && (
+      <img
+        src={info.logoUrl}
+        alt="School logo"
+        className="w-20 h-20 object-contain mt-3"
+      />
+    )}
+  </div>
+)}
+
+{fields.includes('Description') && (
+  <div className="mb-4">
+    <label className="block text-sm mb-1 capitalize">Description</label>
+    <textarea
+      className="w-full border rounded-md px-3 py-2 text-sm"
+      value={info.description || ''}
+      onChange={(e) => setWizardStep('info', { ...info, description: e.target.value })}
+    />
+  </div>
+)}
         {/* Logo upload wiring goes here — store the file/URL in wizard.info.logoUrl */}
 <div className="flex justify-end">
         <Button className="" onClick={() => navigate(determinPath)}>

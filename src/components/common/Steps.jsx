@@ -1,7 +1,21 @@
+import {useNavigate} from "react-router-dom";
 const Steps = ({ activeStep, textContent }) => {
+  function determinDirection(step){
+ const direction = [
+    'school-setup/info',
+    'school-setup/info2',
+    'school-setup/classes',
+    'school-setup/arms',
+    'school-setup/subjects',
+  ]
+  return direction[step - 1]
+  }
+ 
+  const navigate = useNavigate();
     const handleStepClick = (step) => {
-      if(activeStep === step) return; 
-       
+      
+      if(activeStep === step || step < 1 || step > 5  || step >= activeStep + 2 ) return; 
+      navigate(`/${determinDirection(step)}`);
     }
   return (
     <>

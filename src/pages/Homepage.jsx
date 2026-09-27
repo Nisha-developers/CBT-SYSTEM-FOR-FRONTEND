@@ -6,6 +6,8 @@ import Button from '../components/common/Button';
 export default function Homepage() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(false);
+    const schooDetail =JSON.parse(localStorage.getItem('setupSchoolApi'));
+    console.log(schooDetail); 
 
   // "Get Started" decides Login vs School Setup based on the backend,
   // never the frontend alone (Section 3 of the architecture).
@@ -24,25 +26,25 @@ export default function Homepage() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-8 py-4 border-b">
-        <div className="font-bold text-primary text-lg ">CBT SYSTEM</div>
-        <nav className="flex gap-6 text-sm">
-          <a href="#how-it-works" className="hover:text-primary">How it works</a>
-          <button onClick={() => navigate('/login')} className="hover:text-primary">Login</button>
-          <button onClick={handleGetStarted} className="text-primary font-medium">Sign Up</button>
+        <div className="wrapper-header flex items-center gap-3">
+          <img src="" alt="School Logo" />
+        <div className="font-bold text-primary text-lg ">{schooDetail?.name || 'Cbt System'} </div>
+        </div>
+        <nav className="flex gap-6 text-sm items-center">
+          <a href="https://github.com/Nisha-developers/CBT-SYSTEM-FOR-FRONTEND/blob/main/README.md" className="hover:text-primary">How it works</a>
+          <Button onClick={() => navigate('/login')}>Login</Button>
+         
         </nav>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6">
         <h1 className="text-4xl font-bold mb-4 max-w-2xl">
-          Manage your school's examinations in one place.
+          {schooDetail.HeadLine || "Manage your school's examinations in one place."}
         </h1>
         <p className="text-gray-600 max-w-xl mb-8" id="how-it-works">
-          Set up your school, manage students, create OBJ and theory exams, record
-          and release results, and keep years of past results organized.
+         {schooDetail.description || ' Set up your school, manage students, create OBJ and theory exams, record and release results, and keep years of past results organized.'}
         </p>
-        <Button onClick={handleGetStarted} disabled={checking}>
-          {checking ? 'Checking...' : 'Get Started'}
-        </Button>
+        
       </main>
     </div>
   );
