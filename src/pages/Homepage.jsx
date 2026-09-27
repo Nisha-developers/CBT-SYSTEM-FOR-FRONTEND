@@ -39,10 +39,10 @@ export default function Homepage() {
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6">
         <h1 className="text-4xl font-bold mb-4 max-w-2xl">
-          {schooDetail.HeadLine || "Manage your school's examinations in one place."}
+          {schooDetail?.HeadLine || "Manage your school's examinations in one place."}
         </h1>
         <p className="text-gray-600 max-w-xl mb-8" id="how-it-works">
-         {schooDetail.description || ' Set up your school, manage students, create OBJ and theory exams, record and release results, and keep years of past results organized.'}
+         {schooDetail?.description || ' Set up your school, manage students, create OBJ and theory exams, record and release results, and keep years of past results organized.'}
         </p>
         
       </main>
