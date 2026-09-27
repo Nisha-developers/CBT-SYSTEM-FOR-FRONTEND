@@ -35,14 +35,6 @@ import TakeExam from '../pages/Student/TakeExam';
 import MyResults from '../pages/Student/MyResults';
 
 export default function AppRoutes() {
-   const navigate = useNavigate();
-  const schooDetail = localStorage.getItem('setupSchoolApi');
-const schoolSetupCompleted = Boolean(schooDetail);
-
-  if(!schoolSetupCompleted){
-  navigate('/school-setup/info')
-  }
- 
   const question1 = ['name', 'motto', 'address', 'phone'];
   const question2 = ['email', 'HeadLine', 'Description', 'Logo'];
 
