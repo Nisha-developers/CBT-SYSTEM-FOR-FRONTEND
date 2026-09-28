@@ -33,16 +33,16 @@ export default function Step1SchoolInfo({fields}) {
 
         {fields.map((field) => (
           field !== 'Logo' && field !== 'Description' && (
-             <div key={field} className="mb-4">
+             <form key={field} className="mb-4">
             <label className="block text-sm mb-1 capitalize">{field}</label>
             
             <input
               className="w-full border rounded-md px-3 py-2 text-sm"
               value={info[field] || ''}
               onChange={(e) => setWizardStep('info', { ...info, [field]: e.target.value })}
-            />
+           required />
            
-          </div>
+          </form>
           )
         ))}
         {/* Logo upload */}
@@ -86,18 +86,18 @@ export default function Step1SchoolInfo({fields}) {
 )}
 
 {fields.includes('Description') && (
-  <div className="mb-4">
+  <form className="mb-4">
     <label className="block text-sm mb-1 capitalize">Description</label>
     <textarea
       className="w-full border rounded-md px-3 py-2 text-sm"
       value={info.description || ''}
       onChange={(e) => setWizardStep('info', { ...info, description: e.target.value })}
-    />
-  </div>
+  required  />
+  </form>
 )}
         {/* Logo upload wiring goes here — store the file/URL in wizard.info.logoUrl */}
 <div className="flex justify-end">
-        <Button className="" onClick={() => navigate(determinPath)}>
+        <Button className="" onClick={() => navigate(determinPath)} formAction = {true}>
           Next
         </Button>
         </div>

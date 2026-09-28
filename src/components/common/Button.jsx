@@ -1,5 +1,5 @@
 
-export default function Button({ children, variant = 'primary', className = '', ...props }) {
+export default function Button({ children, variant = 'primary', className = '',formAction = false, ...props }) {
   const base = 'px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50';
   const variants = {
     primary: 'bg-primary text-white hover:bg-primary-dark',
@@ -8,7 +8,7 @@ export default function Button({ children, variant = 'primary', className = '', 
     process: 'bg-amber-500 text-white hover:bg-amber-600'
   };
   return (
-    <button className={`${base} ${variants[variant]} ${className}`} {...props}>
+    <button className={`${base} ${variants[variant]} ${className}`} type={formAction ? 'submit' : 'button'} {...props} >
       {children}
       
     </button>
