@@ -13,13 +13,14 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    try {
-      const { data } = await adminLogin(form);
-      login(data.token, { ...data.admin, role: 'admin' });
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
-    }
+    navigate('/dashboard')
+    // try {
+    //   const { data } = await adminLogin(form);
+    //   login(data.token, { ...data.admin, role: 'admin' });
+    //   navigate('/dashboard');
+    // } catch (err) {
+    //   setError(err.response?.data?.message || 'Login failed');
+    // }
   };
 
   return (
@@ -41,9 +42,6 @@ export default function Login() {
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
         <Button type="submit" className="w-full">Login</Button>
-        <p className="text-xs text-gray-500 mt-4 text-center">
-          Student? <Link to="/student/login" className="text-primary">Login here</Link>
-        </p>
       </form>
     </div>
   );

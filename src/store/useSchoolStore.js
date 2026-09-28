@@ -16,8 +16,9 @@ export const useSchoolStore = create((set) => ({
     arms: [], // [{ className, armNames: [] }]
     classes: [],
     subjects: [],
+     optionalSubject: [],
   },
   setWizardStep: (key, value) =>
     set((state) => ({ wizard: { ...state.wizard, [key]: value } })),
-  resetWizard: () => set({ wizard: { info: {}, arms: [], classes: [], subjects: [] } }),
+  resetWizard: () => set({ wizard: { info: {}, arms: [], classes: [], subjects: [], optionalSubject: [], } }),
 }));

@@ -6,7 +6,8 @@ import Button from '../components/common/Button';
 export default function Homepage() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(false);
-    const schooDetail =JSON.parse(localStorage.getItem('setupSchoolpi'));
+    const schooDetail =JSON.parse(localStorage.getItem('setupSchoolApi'));
+    console.log(schooDetail);
     console.log(schooDetail?.name);
     
     

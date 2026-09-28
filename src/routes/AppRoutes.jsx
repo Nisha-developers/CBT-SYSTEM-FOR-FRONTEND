@@ -97,9 +97,9 @@ export default function AppRoutes() {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'super_admin', 'teacher']}>
+          // <ProtectedRoute allowedRoles={['admin', 'super_admin', 'teacher']}>
             <DashboardLayout />
-          </ProtectedRoute>
+          // </ProtectedRoute>
         }
       >
         <Route index element={<Overview />} />

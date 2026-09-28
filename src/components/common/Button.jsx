@@ -10,7 +10,6 @@ export default function Button({ children, variant = 'primary', className = '',f
   return (
     <button className={`${base} ${variants[variant]} ${className}`} type={formAction ? 'submit' : 'button'} {...props} >
       {children}
-      
     </button>
 
   );
