@@ -33,6 +33,9 @@ import AvailableExams from '../pages/Student/AvailableExams';
 import ExamInstructions from '../pages/Student/ExamInstructions';
 import TakeExam from '../pages/Student/TakeExam';
 import MyResults from '../pages/Student/MyResults';
+import Admin from '../pages/Dashboard/Admin/Admin';
+import Superior from '../pages/Dashboard/Admin/Superior';
+import Activities from '../pages/Dashboard/Activities';
 
 export default function AppRoutes() {
   const question1 = ['name', 'motto', 'address', 'phone'];
@@ -104,6 +107,7 @@ export default function AppRoutes() {
       >
         <Route index element={<Overview />} />
         <Route path="students" element={<Students />} />
+        <Route path="activity" element={<Activities />} />
 
         <Route path="exams/obj" element={<ObjExam />} />
         <Route path="exams/obj/create" element={<CreateObjExam />} />
@@ -114,6 +118,9 @@ export default function AppRoutes() {
         <Route path="results" element={<ViewResults />} />
         <Route path="results/theory" element={<RecordTheoryMarks />} />
         <Route path="results/past" element={<PastResults />} />
+
+        <Route path="admin" element={<Admin />} />
+        <Route path="admin/superior" element={<Superior />} />
 
         <Route path="settings/school" element={<SchoolSettings />} />
         <Route path="settings/arms" element={<ArmSettings />} />
