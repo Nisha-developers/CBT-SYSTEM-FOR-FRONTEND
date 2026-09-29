@@ -75,26 +75,19 @@ export default function Students() {
         <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h2 className="text-lg font-semibold text-gray-900">Students Information</h2>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 max-sm:flex-col max-sm:items-start">
             <div className="relative">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
               <input
                 placeholder="Search class"
-                className="w-full sm:w-64 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
-              />
-            </div>
-            <div className="relative">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-              <input
-                placeholder="Search class"
-                className="w-full sm:w-64 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+                className="w-full sm:w-30 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
               />
             </div>
              <div className="relative">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
               <input
-                placeholder="Search class"
-                className="w-full sm:w-64 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+                placeholder="Search arm "
+                className="w-full sm::w-30 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
               />
             </div>
            
@@ -102,7 +95,7 @@ export default function Students() {
         </div>
 
         {/* Table Section */}
-        <div className="overflow-x-auto">
+        <div className="">
           <Table 
             columns={columns} 
             rows={displayStudents} 
