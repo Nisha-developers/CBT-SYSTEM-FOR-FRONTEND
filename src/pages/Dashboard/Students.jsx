@@ -61,7 +61,7 @@ export default function Students() {
         {/* Purple button in inspiration, adapted to Blue-600 as requested */}
         <Button 
           onClick={() => setModalOpen(true)}
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm"
+          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm w-[20%]"
         >
           <Plus className="w-4 h-4" />
           Add Students
@@ -87,7 +87,7 @@ export default function Students() {
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
               <input
                 placeholder="Search arm "
-                className="w-full sm::w-30 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+                className="w-full sm:w-30 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
               />
             </div>
            

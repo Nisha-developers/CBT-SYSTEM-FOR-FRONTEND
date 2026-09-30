@@ -1,8 +1,7 @@
-// Generic table: columns = [{ key, label }], rows = array of objects.
 export default function Table({ columns, rows, actions }) {
   return (
-    <div className="overflow-x-auto border rounded-lg">
-      <table className="min-w-full text-sm text-left">
+    <div className=" overflow-x-auto border rounded-lg">
+      <table className="min-w-full text-sm text-left whitespace-nowrap">
         <thead className="bg-gray-100 text-gray-600">
           <tr>
             {columns.map((col) => (
@@ -15,7 +14,7 @@ export default function Table({ columns, rows, actions }) {
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={row.id ?? i} className="border-t hover:bg-gray-50">
+            <tr key={row._id ?? row.id ?? i} className="border-t hover:bg-gray-50">
               {columns.map((col) => (
                 <td key={col.key} className="px-4 py-2">
                   {row[col.key]}
