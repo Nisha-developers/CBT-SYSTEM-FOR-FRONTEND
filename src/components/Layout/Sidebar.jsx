@@ -37,8 +37,8 @@ const Sidebar = ({ isOpen, onClose }) => {
   ];
   const Results = [
      { label: 'Current', icon: ChartNoAxesColumnIncreasing, to: '/dashboard/results', end: true},
+      { label: 'Review', icon: History, to: '/dashboard/results/review'},
     { label: 'Past', icon: History, to: '/dashboard/results/past'},
-    { label: 'Review', icon: History, to: '/dashboard/results/review'},
 
   ]
 
@@ -96,6 +96,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 key={item.label}
                 to= {item.to}
                 end={item.end}
+                 onClick={onClose}
                 className={({isActive})=>`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                  isActive 
                     ? 'bg-blue-50 text-blue-700' 
