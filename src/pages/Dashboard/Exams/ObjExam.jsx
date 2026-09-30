@@ -23,6 +23,7 @@ import {
   ArrowRight,
   Eye
 } from 'lucide-react';
+import SetObjQuestion from './SetObjQuestion';
 
 // --- JUNK DATA: EXAM CONFIGURATIONS ---
 const MOCK_EXAM_CONFIGS = [
@@ -41,6 +42,8 @@ export default function ObjExam() {
   const [activeTab, setActiveTab] = useState('config');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [disableQuestion, setDisableQuestion] = useState(false);
+  const [openConfig, openSetConfig] = useState(false);
+
   
   // --- FILTER STATES ---
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,6 +59,12 @@ export default function ObjExam() {
   }, []);
 
   const sourceExams = exams && exams.length > 0 ? exams : MOCK_EXAM_CONFIGS;
+  const handleOpenConfig = () =>{
+    openSetConfig(true);
+  }
+   const handleCloseConfig = () =>{
+    openSetConfig(false);
+  }
 
   // --- FILTERING LOGIC ---
   const filteredExams = useMemo(() => {
@@ -126,12 +135,10 @@ export default function ObjExam() {
             Manage objective exam configurations across all classes and arms.
           </p>
         </div>
-        <Link to="/dashboard/exams/obj/create">
-          <Button className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm">
+    <Button className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm" onClick={handleOpenConfig}>
             <Plus className="w-4 h-4" />
             Create Exam Config
           </Button>
-        </Link>
       </div>
 
       {/* --- TABS --- */}
@@ -176,6 +183,7 @@ export default function ObjExam() {
 
           {/* --- SEARCH & FILTER BAR --- */}
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex flex-col lg:flex-row gap-3">
+          <SetObjQuestion />
             
             {/* Search Input */}
             <div className="relative flex-1">
@@ -248,6 +256,7 @@ export default function ObjExam() {
                       {exam.createdAt || 'Recently'}
                     </span>
                   </div>
+                 
 
                   {/* Subject & Title */}
                   <div className="mb-4">
@@ -350,7 +359,10 @@ export default function ObjExam() {
               </div>
               {renderStatusBadge(selectedExam.status)}
             </div>
-
+            {
+              
+            }
+       
             {/* Details Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
@@ -396,6 +408,7 @@ export default function ObjExam() {
                 <span className="text-sm font-semibold text-gray-900">{selectedExam.passMark}</span>
               </div>
             </div>
+          
 
             {/* Dates */}
             <div className="flex items-center justify-between text-xs text-gray-500 bg-gray-50 rounded-lg p-3 border border-gray-100">
@@ -423,6 +436,9 @@ export default function ObjExam() {
           </div>
         )}
       </Modal>
+       <Modal open={openConfig} onClose={handleCloseConfig} title='Set Exam Config'>
+                  Hello, we will create the form tomorrow, please dont disturb me
+                  </Modal>
 
     </div>
   );
