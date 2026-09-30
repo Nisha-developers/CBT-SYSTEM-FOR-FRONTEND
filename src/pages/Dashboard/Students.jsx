@@ -76,14 +76,14 @@ export default function Students() {
           <h2 className="text-lg font-semibold text-gray-900">Students Information</h2>
           
           <div className="flex items-center gap-3 max-sm:flex-col max-sm:items-start">
-            <div className="relative">
+            <div className="relative self-end">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
               <input
                 placeholder="Search class"
                 className="w-full sm:w-30 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
               />
             </div>
-             <div className="relative">
+             <div className="relative self-end">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
               <input
                 placeholder="Search arm "
@@ -143,7 +143,7 @@ export default function Students() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add Student">
         <form onSubmit={handleAdd} className="space-y-4 pt-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {['fullName', 'admissionNumber', 'classId', 'armId'].map((field) => (
+            {['FirstName', 'UniqueId', 'class', 'arm'].map((field) => (
               <div key={field} className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-gray-700 capitalize">
                   {field.replace(/([A-Z])/g, ' $1').trim()}
@@ -158,19 +158,8 @@ export default function Students() {
             ))}
           </div>
           
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-gray-700">Gender</label>
-            <select
-              className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
-              value={form.gender}
-              onChange={(e) => setForm({ ...form, gender: e.target.value })}
-            >
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-
+        
+         
           <div className="pt-2">
             <Button 
               type="submit" 
