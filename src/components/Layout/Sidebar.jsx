@@ -38,6 +38,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const Results = [
      { label: 'Current', icon: ChartNoAxesColumnIncreasing, to: '/dashboard/results', end: true},
     { label: 'Past', icon: History, to: '/dashboard/results/past'},
+    { label: 'Review', icon: History, to: '/dashboard/results/review'},
 
   ]
 

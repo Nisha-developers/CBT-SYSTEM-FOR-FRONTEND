@@ -13,7 +13,7 @@ export default function DashboardLayout() {
       />
       <div className="flex-1 flex flex-col">
         <Header openNav = {setIsSidebarOpen} />
-        <main className="p-6 flex-1">
+        <main className="flex-1 min-w-0 flex flex-col">
           <Outlet />
         </main>
       </div>

@@ -36,6 +36,7 @@ import MyResults from '../pages/Student/MyResults';
 import Admin from '../pages/Dashboard/Admin/Admin';
 import Superior from '../pages/Dashboard/Admin/Superior';
 import Activities from '../pages/Dashboard/Activities';
+import ReviewResults from '../pages/Dashboard/Results/ReviewResults';
 
 export default function AppRoutes() {
   const question1 = ['name', 'motto', 'address', 'phone'];
@@ -118,6 +119,7 @@ export default function AppRoutes() {
         <Route path="results" element={<ViewResults />} />
         <Route path="results/theory" element={<RecordTheoryMarks />} />
         <Route path="results/past" element={<PastResults />} />
+        <Route path='results/review' element={<ReviewResults />} />
 
         <Route path="admin" element={<Admin />} />
         <Route path="admin/superior" element={<Superior />} />
