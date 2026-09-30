@@ -437,7 +437,7 @@ export default function ObjExam() {
         )}
       </Modal>
        <Modal open={openConfig} onClose={handleCloseConfig} title='Set Exam Config'>
-                  Hello, we will create the form tomorrow, please dont disturb me
+                  My creator do not want to produce. Let us see how it goes tomorrow 
                   </Modal>
 
     </div>
