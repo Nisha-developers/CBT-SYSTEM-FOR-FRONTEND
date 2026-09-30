@@ -127,6 +127,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     key={item.label}
     to={item.to}
     end={item.end}
+    onClick={onClose}
     className={({ isActive }) => `flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
       isActive
         ? 'bg-blue-50 text-blue-700'
@@ -151,6 +152,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     key={item.label}
     to={item.to}
     end={item.end}
+    onClick={onClose}
     className={({ isActive }) => `flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
       isActive
         ? 'bg-blue-50 text-blue-700'
@@ -177,6 +179,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     key={item.label}
     to={item.to}
     end={item.end}
+    onClick={onClose}
     className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
       isActive
         ? 'bg-blue-50 text-blue-700'
