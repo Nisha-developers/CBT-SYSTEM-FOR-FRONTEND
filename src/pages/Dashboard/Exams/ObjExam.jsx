@@ -4,6 +4,7 @@ import { listExams } from '../../../api/exam.api';
 import { useExamStore } from '../../../store/useExamStore';
 import Table from '../../../components/common/Table';
 import Modal from '../../../components/common/Modal';
+import QuestionImport from './QuestionImport.jsx';
 import Button from '../../../components/common/Button';
 import { 
   Settings, 
@@ -23,7 +24,7 @@ import {
   ArrowRight,
   Eye
 } from 'lucide-react';
-import SetObjQuestion from './SetObjQuestion';
+import SetConfig from './SetConfig.jsx';
 
 // --- JUNK DATA: EXAM CONFIGURATIONS ---
 const MOCK_EXAM_CONFIGS = [
@@ -183,8 +184,6 @@ export default function ObjExam() {
 
           {/* --- SEARCH & FILTER BAR --- */}
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex flex-col lg:flex-row gap-3">
-          <SetObjQuestion />
-            
             {/* Search Input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
@@ -196,6 +195,8 @@ export default function ObjExam() {
                 className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
               />
             </div>
+            {/* Set active tab */}
+            {activeTab === 'questions' && <div>Hello world</div>}
 
             {/* Class Filter */}
             <div className="relative sm:w-44">
@@ -336,8 +337,9 @@ export default function ObjExam() {
           )}
         </div>
       )}
-
-<div>Set Question</div>      
+     {/* SEt exam */}
+     {activeTab === 'questions' && <QuestionImport />}
+     
       {/* --- MODAL: EXAM CONFIG DETAILS --- */}
       <Modal 
         open={isModalOpen} 
@@ -436,10 +438,9 @@ export default function ObjExam() {
           </div>
         )}
       </Modal>
-       <Modal open={openConfig} onClose={handleCloseConfig} title='Set Exam Config'>
-                  My creator do not want to produce. Let us see how it goes tomorrow 
+       <Modal open={openConfig}  title='Set Exam Config'>
+               <SetConfig saveConfig = {handleSetExam}  onClose={handleCloseConfig}/>
                   </Modal>
-
     </div>
   );
 }

@@ -6,11 +6,12 @@ import Button from '../../../components/common/Button';
 // Section 13: Upload PDF/Word -> AI extraction -> preview -> teacher
 // edits/corrects -> confirm -> saved to question bank. Nothing is
 // published without this human review step.
-export default function QuestionImport() {
+export default function QuestionImport({examType = 'obj'}) {
   const { id: examId } = useParams();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState([]);
   const [manual, setManual] = useState({ text: '', A: '', B: '', C: '', D: '', correctOption: '' });
+  const theoryExam = examType === 'theory';
 
   const handleUpload = async () => {
     if (!file) return;
@@ -93,17 +94,20 @@ export default function QuestionImport() {
       <section className="bg-white p-6 rounded-lg shadow">
         <h2 className="font-semibold mb-3">Add Question Manually</h2>
         <form onSubmit={handleAddManual} className="space-y-2">
-          <textarea className="w-full border rounded-md px-2 py-1 text-sm" placeholder="Question"
+          <textarea className="w-full border rounded-md px-2 py-1 text-sm"
+     rows={!theoryExam ? 2 : 5} placeholder="Question"
             value={manual.text} onChange={(e) => setManual({ ...manual, text: e.target.value })} />
-          <div className="grid grid-cols-2 gap-2">
+          
+          {!theoryExam && <div className="grid grid-cols-2 gap-2">
             {['A', 'B', 'C', 'D'].map((opt) => (
               <input key={opt} className="border rounded-md px-2 py-1 text-sm" placeholder={`Option ${opt}`}
                 value={manual[opt]} onChange={(e) => setManual({ ...manual, [opt]: e.target.value })} />
             ))}
-          </div>
-          <input className="border rounded-md px-2 py-1 text-sm w-32" placeholder="Correct (A-D)"
-            value={manual.correctOption} onChange={(e) => setManual({ ...manual, correctOption: e.target.value })} />
-          <Button type="submit">Add Question</Button>
+          </div>}
+          {!theoryExam && <input className="border rounded-md px-2 py-1 text-sm w-32" placeholder="Correct (A-D)"
+            value={manual.correctOption} onChange={(e) => setManual({ ...manual, correctOption: e.target.value })} />}
+          
+          <Button type="submit" className='block mx-auto mt-8'>{theoryExam ? 'Submit Question' : 'Add Question'}</Button>
         </form>
       </section>
     </div>
