@@ -12,7 +12,6 @@ import {
   ChevronRight,
   Play,
   ArrowRight,
-  Menu
 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';

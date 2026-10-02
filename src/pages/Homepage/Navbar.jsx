@@ -1,5 +1,5 @@
 import React from 'react';
-import {Menu} from 'lucide-react';
+
 import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = ({handlegetstart, checkingva}) => {
@@ -37,9 +37,7 @@ const Navbar = ({handlegetstart, checkingva}) => {
                Help
               </button>
               </Link>
-              <button className="lg:hidden text-gray-600">
-                <Menu className="w-6 h-6" />
-              </button>
+            
             </div>
           </div>
 
