@@ -2,9 +2,10 @@ import { Routes, Route, useNavigate} from 'react-router-dom';
 import { useEffect } from 'react';
 import ProtectedRoute from './ProtectedRoute';
 
-import Homepage from '../pages/Homepage';
+
 import Login from '../pages/Login';
 import AdminSignup from '../pages/AdminSignup';
+
 
 import Step1SchoolInfo from '../pages/SchoolSetup/Step1SchoolInfo';
 import Step2Arms from '../pages/SchoolSetup/Step2Arms';
@@ -37,6 +38,8 @@ import Admin from '../pages/Dashboard/Admin/Admin';
 import Superior from '../pages/Dashboard/Admin/Superior';
 import Activities from '../pages/Dashboard/Activities';
 import ReviewResults from '../pages/Dashboard/Results/ReviewResults';
+import Homepage from '../pages/Homepage/Homepage';
+import Help from '../pages/Homepage/Help';
 
 export default function AppRoutes() {
   const question1 = ['name', 'motto', 'address', 'phone'];
@@ -54,6 +57,11 @@ export default function AppRoutes() {
       <Route path="/school-setup/subjects" element={<Step4Subjects />} />
       <Route path="/school-setup/admin-signup" element={<AdminSignup />} />
 
+       {/* Landing page  */}
+       <Route path="/help" element={<Help/>} />
+
+     
+
       {/* Student */}
       <Route path="/student/login" element={<StudentLogin />} />
       <Route
@@ -65,17 +73,17 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="/student/exams"
+        path="/students/exams"
         element={
-          <ProtectedRoute allowedRoles={['student']}>
+          // <ProtectedRoute allowedRoles={[['admin', 'super_admin']]}>
             <AvailableExams />
-          </ProtectedRoute>
+          // </ProtectedRoute>
         }
       />
       <Route
-        path="/student/exams/:id/instructions"
+        path="/student/exams/instructions"
         element={
-          <ProtectedRoute allowedRoles={['student']}>
+          <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
             <ExamInstructions />
           </ProtectedRoute>
         }
@@ -101,7 +109,7 @@ export default function AppRoutes() {
       <Route
         path="/dashboard"
         element={
-          // <ProtectedRoute allowedRoles={['admin', 'super_admin', 'teacher']}>
+          // <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
             <DashboardLayout />
           // </ProtectedRoute>
         }
