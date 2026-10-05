@@ -76,7 +76,6 @@ export default function Header({ openNav }) {
             <div className="px-4 py-2 border-b border-gray-100 mb-1">
               <p className="text-xs font-medium text-gray-900 truncate">{user?.fullName || 'Admin'}</p>
               <p className="text-[10px] text-gray-500 truncate">{user?.email || 'admin@school.com'}</p>
-              <Link to='/students/exams' className='text-xs font-medium text-gray-900 truncate'>Open Exam</Link>
             </div>
             
             <button

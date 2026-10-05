@@ -279,7 +279,7 @@ export default function Homepage() {
               title: 'Set Up Your School',
               desc: 'Configure your school name, classes, arms, and subjects in minutes.',
               helpId: '3-initial-school-setup',
-              img: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+              img: 'https://unsplash.com/photos/person-typing-on-a-laptop-at-a-wooden-desk-y4h0lH6QxhY',
             },
             {
               tag: 'Step 02',

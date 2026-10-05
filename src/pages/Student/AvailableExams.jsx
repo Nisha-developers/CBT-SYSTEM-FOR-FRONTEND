@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { availableExams } from '../../api/exam.api';
 import { useExamStore } from '../../store/useExamStore';
+import Modal from '../../components/common/Modal';
+import DetectMobile from '../../components/common/DetectMobile';
 import { 
   Search, 
   ChevronDown, 
@@ -14,13 +16,12 @@ import {
   Award,
   Info,
   Play,
-  ClipboardList
+  ClipboardList,
+  Smartphone,
+  ShieldAlert
 } from 'lucide-react';
 
-//   const { exams, setExams } = useExamStore();  const { exams, setExams } = useExamStore();
-//   import { availableExams } from '../../api/exam.api';
-// import { useExamStore } from '../../store/useExamStore';
-//     availableExams().then(({ data }) => setExams(data.exams));
+
 
 
 // =========================================================
@@ -43,17 +44,36 @@ const MOCK_EXAMS = [
 const CLASS_OPTIONS = ['JSS1', 'JSS2', 'JSS3', 'SS1', 'SS2', 'SS3'];
 const ARM_OPTIONS = ['A', 'B', 'C', 'D'];
 const SUBJECT_OPTIONS = ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Economics', 'Further Maths', 'Government'];
+const EXAM_TYPE = ['Theory', 'Objectives']
 
 export default function AvailableExams() {
   const navigate = useNavigate();
   const { exams, setExams } = useExamStore();
-
+  const [isMobile, setIsMobile] = useState(false);
+  
+ 
+useEffect(()=>{
+  function checkScreenSize(){
+if(innerWidth > 768 ){
+  setIsMobile(false);
+}
+else{
+  setIsMobile(true);
+}
+  }
+  checkScreenSize();
+window.addEventListener('resize', checkScreenSize);
+return ()=>{
+  window.removeEventListener('resize',checkScreenSize);
+}
+}, [])
   // --- SELECTION STATE ---
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedArm, setSelectedArm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [selectedType, setselectedType] = useState('');
 
   // --- YOUR ORIGINAL FETCH LOGIC (UNTOUCHED) ---
   useEffect(() => {
@@ -63,54 +83,34 @@ export default function AvailableExams() {
   // Use mock data if the store is empty
   const sourceExams = exams && exams.length > 0 ? exams : MOCK_EXAMS;
 
-  // --- FILTER EXAMS BY SELECTION ---
-  const filteredExams = useMemo(() => {
-    if (!hasSearched) return [];
-    return sourceExams.filter((exam) => {
-      const matchClass = exam.class === selectedClass;
-      const matchArm = exam.arm === selectedArm;
-      const matchSubject = exam.subject === selectedSubject;
-      return matchClass && matchArm && matchSubject;
-    });
-  }, [sourceExams, hasSearched, selectedClass, selectedArm, selectedSubject]);
+  
 
   // --- VALIDATION: All three must be selected ---
-  const isSelectionComplete = selectedClass && selectedArm && selectedSubject;
+  const isSelectionComplete = selectedClass && selectedArm && selectedSubject && selectedType;
 
   const handleContinue = () => {
     if (!isSelectionComplete) return;
     setIsChecking(true);
-    setTimeout(() => {
-      setHasSearched(true);
-      setIsChecking(false);
-    }, 500);
+    handleReset();
+    navigate('/student/exams/instructions');
   };
 
   const handleReset = () => {
     setSelectedClass('');
+    setselectedType('');
     setSelectedArm('');
     setSelectedSubject('');
     setHasSearched(false);
   };
 
-  const getStatusBadge = (status) => {
-    const styles = {
-      Active: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-      Scheduled: 'bg-amber-50 text-amber-700 border-amber-100',
-      Completed: 'bg-blue-50 text-blue-700 border-blue-100',
-    };
-    return (
-      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${styles[status] || 'bg-gray-50 text-gray-600 border-gray-100'}`}>
-        {status}
-      </span>
-    );
-  };
+  
+  if(isMobile){
+     return (
+   <DetectMobile />
+     )
+  }
 
-  const getTypeBadge = (type) => {
-    return type === 'OBJ'
-      ? 'bg-blue-50 text-blue-700 border-blue-100'
-      : 'bg-gray-50 text-gray-700 border-gray-200';
-  };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
@@ -125,7 +125,7 @@ export default function AvailableExams() {
             Available Exams
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Select a class, arm, and subject to view available examinations.
+            Select a class, arm,subject and type to view available examinations.
           </p>
         </div>
 
@@ -151,7 +151,7 @@ export default function AvailableExams() {
           <div className="p-6 space-y-5">
             
             {/* Three Dropdowns */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-4 gap-4">
               
               {/* Class */}
               <div className="flex flex-col gap-1.5">
@@ -224,58 +224,60 @@ export default function AvailableExams() {
                   <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
                 </div>
               </div>
+                {/*Type */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-gray-400" />
+                  Type <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedType}
+                    onChange={(e) => {
+                      setselectedType(e.target.value);
+                      setHasSearched(false);
+                    }}
+                    className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg pl-3 pr-9 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors cursor-pointer"
+                  >
+                    <option value="">Select Type </option>
+                    {EXAM_TYPE.map((cls) => (
+                      <option key={cls} value={cls}>{cls}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
+                </div>
+              </div>
             </div>
+            
 
             {/* Selection Summary */}
-            {isSelectionComplete && !hasSearched && (
+            {isSelectionComplete &&(
               <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
                 <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <p className="text-xs text-blue-700">
-                  Ready to search: <strong>{selectedClass}</strong> · <strong>Arm {selectedArm}</strong> · <strong>{selectedSubject}</strong>
+                  Ready to search: <strong>{selectedClass}</strong> · <strong>Arm {selectedArm}</strong> · <strong>{selectedSubject}</strong> · <strong>{selectedType}</strong>
                 </p>
               </div>
             )}
 
             {/* Continue Button */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              {hasSearched && (
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Reset Selection
-                </button>
-              )}
+            <div className="flex flex-col sm:flex-row gap-3 pt-2"> 
               <button
                 type="button"
                 onClick={handleContinue}
-                disabled={!isSelectionComplete || isChecking}
+                disabled={!isSelectionComplete}
                 className={`flex-1 sm:flex-none sm:min-w-[180px] flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium rounded-lg transition-colors shadow-sm ${
-                  isSelectionComplete && !isChecking
+                  isSelectionComplete
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
               >
-                {isChecking ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Checking...
-                  </>
-                ) : (
-                  <>
                     Continue
                     <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
               </button>
             </div>
           </div>
         </div>
-
-        {/* ========================================================= */}
-       
-
       </div>
     </div>
   );

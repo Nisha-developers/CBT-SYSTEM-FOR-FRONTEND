@@ -15,16 +15,16 @@ export default {
     '100%': { filter: 'blur(0px)' },
   },
   'fade-in-up': {
-    '0%': { opacity: '0', transform: 'translateY(10px)' },
-    '100%': { opacity: '1', transform: 'translateY(0)' },
+    '0%': { filter: 'blur(20px)', transform: 'translateY(10px)' },
+    '100%': { filter: 'blur(0)', transform: 'translateY(0)' },
   },
   'fade-in-left': {
-    '0%': { opacity: '0', transform: 'translateX(-40px)' },
-    '100%': { opacity: '1', transform: 'translateX(0)' },
+    '0%': { filter: 'blur(20px)', transform: 'translateX(-40px)' },
+    '100%': { filter: 'blur(0)', transform: 'translateX(0)' },
   },
   'fade-in-right': {
-    '0%': { opacity: '0', transform: 'translateX(40px)' },
-    '100%': { opacity: '1', transform: 'translateX(0)' },
+    '0%': { filter: 'blur(20px)', transform: 'translateX(40px)' },
+    '100%': { filter: 'blur(0)', transform: 'translateX(0)' },
   },
 },
 animation: {

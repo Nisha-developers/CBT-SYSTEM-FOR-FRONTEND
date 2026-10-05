@@ -18,6 +18,10 @@ const Reveal = ({
           setIsVisible(true);
           observer.unobserve(entry.target);
         }
+        else{
+          setIsVisible(false);
+          observer.observe(entry.target);
+        }
       },
       { threshold }
     );
@@ -36,7 +40,7 @@ const Reveal = ({
   return (
     <div
       ref={ref}
-      className={`${className} ${isVisible ? animationClass : 'opacity-0'}`}
+      className={`${className} ${isVisible ? animationClass : 'blur(20px)'}`}
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
     >
       {children}

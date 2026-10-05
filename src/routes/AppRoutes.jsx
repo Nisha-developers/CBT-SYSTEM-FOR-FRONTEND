@@ -5,6 +5,7 @@ import ProtectedRoute from './ProtectedRoute';
 
 import Login from '../pages/Login';
 import AdminSignup from '../pages/AdminSignup';
+import Error from '../pages/Error';
 
 
 import Step1SchoolInfo from '../pages/SchoolSetup/Step1SchoolInfo';
@@ -27,8 +28,6 @@ import SchoolSettings from '../pages/Dashboard/Settings/SchoolSettings';
 import ArmSettings from '../pages/Dashboard/Settings/ArmSettings';
 import SubjectSettings from '../pages/Dashboard/Settings/SubjectSettings';
 import DeleteSchool from '../pages/Dashboard/Settings/DeleteSchool';
-
-import StudentLogin from '../pages/Student/StudentLogin';
 import StudentDashboard from '../pages/Student/StudentDashboard';
 import AvailableExams from '../pages/Student/AvailableExams';
 import ExamInstructions from '../pages/Student/ExamInstructions';
@@ -40,6 +39,7 @@ import Activities from '../pages/Dashboard/Activities';
 import ReviewResults from '../pages/Dashboard/Results/ReviewResults';
 import Homepage from '../pages/Homepage/Homepage';
 import Help from '../pages/Homepage/Help';
+import StudentLogin from '../pages/Student/StudentLogin';
 
 export default function AppRoutes() {
   const question1 = ['name', 'motto', 'address', 'phone'];
@@ -59,6 +59,7 @@ export default function AppRoutes() {
 
        {/* Landing page  */}
        <Route path="/help" element={<Help/>} />
+       <Route path="*" element={<Error/>} />
 
      
 
@@ -83,19 +84,22 @@ export default function AppRoutes() {
       <Route
         path="/student/exams/instructions"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
-            <ExamInstructions />
-          </ProtectedRoute>
+          <ExamInstructions />
+          // <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
+            
+          // </ProtectedRoute>
         }
       />
       <Route
         path="/student/exams/:id/take"
         element={
-          <ProtectedRoute allowedRoles={['student']}>
-            <TakeExam />
-          </ProtectedRoute>
+           <TakeExam />
+          // <ProtectedRoute allowedRoles={['student']}>
+           
+          // </ProtectedRoute>
         }
       />
+      
       <Route
         path="/student/results"
         element={
@@ -114,6 +118,7 @@ export default function AppRoutes() {
           // </ProtectedRoute>
         }
       >
+        
         <Route index element={<Overview />} />
         <Route path="students" element={<Students />} />
         <Route path="activity" element={<Activities />} />
