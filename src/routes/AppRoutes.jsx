@@ -4,7 +4,7 @@ import ProtectedRoute from './ProtectedRoute';
 
 
 import Login from '../pages/Login';
-import AdminSignup from '../pages/AdminSignup';
+
 import Error from '../pages/Error';
 
 
@@ -55,7 +55,6 @@ export default function AppRoutes() {
       <Route path="/school-setup/classes" element={<Step3Classes />} />
       <Route path="/school-setup/arms" element={<Step2Arms />} />
       <Route path="/school-setup/subjects" element={<Step4Subjects />} />
-      <Route path="/school-setup/admin-signup" element={<AdminSignup />} />
 
        {/* Landing page  */}
        <Route path="/help" element={<Help/>} />
