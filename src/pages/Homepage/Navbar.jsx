@@ -26,7 +26,10 @@ const Navbar = ({handlegetstart, checkingva}) => {
             {/* Right Side Actions */}
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => navigate('/login')}
+                onClick={() => {
+                  navigate('/login');
+                  localStorage.removeItem('setupSchoolApi');
+                }}
                 className="hidden sm:flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
               >
                 Login

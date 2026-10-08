@@ -102,9 +102,10 @@ export default function AppRoutes() {
       <Route
         path="/student/results"
         element={
-          <ProtectedRoute allowedRoles={['student']}>
-            <MyResults />
-          </ProtectedRoute>
+           <MyResults />
+          // <ProtectedRoute allowedRoles={['student']}>
+           
+          // </ProtectedRoute>
         }
       />
 

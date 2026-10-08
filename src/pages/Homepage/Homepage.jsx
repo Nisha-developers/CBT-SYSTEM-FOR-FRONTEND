@@ -101,7 +101,9 @@ export default function Homepage() {
                     From student registration to result release, everything you need to run a modern school.
                   </p>
                   <button
-                    onClick={() => navigate('/login')}
+                    onClick={() =>{ navigate('/login');
+                      localStorage.removeItem('setupSchoolApi');
+                    }}
                     className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-white uppercase tracking-wider transition-all duration-300 hover:text-blue-200 hover:gap-2 group"
                   >
                     Login to Dashboard <ChevronRight className="w-3 h-3 transition-transform duration-300 group-hover:translate-x-1" />
