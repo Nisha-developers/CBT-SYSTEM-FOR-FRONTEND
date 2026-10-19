@@ -12,8 +12,10 @@ export default function Step2Arms() {
   const [armInput, setArmInput] = useState('');
   const [editingClass, setEditingClass] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [error, setError] = useState('');
 const addArm = () => {
   const newArm = armInput.trim();
+ 
 
   if (!className || !newArm) return;
 
@@ -46,6 +48,18 @@ const addArm = () => {
   setWizardStep('arms', updated);
   setArmInput('');
 };
+
+ function handleNext(){
+    if(wizard?.arms?.length <= 0){
+      setError('Add at least an arm before you can proceed');
+      setTimeout(() => {
+        setError('');
+      }, 3000);
+    }
+    else{
+        navigate('/school-setup/subjects');
+    }
+  }
 
 const editArm = (className, index, armName) => {
   window.scrollTo({
@@ -109,7 +123,8 @@ const deleteArm = (className, index) => {
     <div className="min-h-screen flex items-center  bg-gray-50 flex-col">
       
        <Steps activeStep={4} textContent = 'Arms per class (e.g. A, B, Science)' />
-      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md mt-14">
+       <div className='text-sm text-red-600'>{error}</div>
+      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md mt-2">
        
      <Button className="mb-8" onClick={() => navigate('/school-setup/classes')}>
               Prev
@@ -239,7 +254,7 @@ const deleteArm = (className, index) => {
   ))}
 </ul>
 <div className="flex justify-end">
-        <Button className="" onClick={() => navigate('/school-setup/subjects')}>
+        <Button className="" onClick={handleNext}>
          Next
         </Button>
         </div>

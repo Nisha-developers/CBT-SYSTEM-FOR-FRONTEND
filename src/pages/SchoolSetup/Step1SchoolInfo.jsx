@@ -16,8 +16,7 @@ export default function Step1SchoolInfo({fields}) {
   const info = wizard.info;
 
   const handleNext = () => {
-
-    for (const field of fields) {
+for (const field of fields) {
 
       // if (field === 'Logo') {
       //   if (!info.logoUrl) return;
@@ -42,9 +41,18 @@ export default function Step1SchoolInfo({fields}) {
         if (!/^\d+$/.test(info[field])) return;
       }
     }
+    sessionStorage.setItem('addvalue', JSON.stringify(wizard));
 
     navigate(determinPath);
   };
+  useEffect(()=>{
+      const data =  JSON.parse(sessionStorage.getItem('addvalue'));
+      console.log(data);
+  if(data){
+  setWizardStep(data);
+  }
+
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
