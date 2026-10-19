@@ -19,7 +19,7 @@ const Steps = ({ activeStep, textContent }) => {
     }
   return (
     <>
-      <h1 className="text-xl font-extrabold mb-9 pt-10 text-red-600 text-center">School Setup</h1>
+      <h1 className="text-xl font-extrabold mb-9 pt-10 text-blue-600 text-center">School Setup</h1>
     <ul className="flex justify-center space-x-4 mb-6">
       {[1, 2, 3, 4, 5].map((step) => (
         <li
