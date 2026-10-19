@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // withCredentials lets the browser send the httpOnly refresh cookie to the API.
 export const bareApi = axios.create({ baseURL, withCredentials: true });   // no interceptors: used for refresh/logout
