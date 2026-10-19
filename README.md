@@ -3,7 +3,7 @@
 React + Vite + Tailwind + Zustand. Talks to the CBT backend API.
 
 1. `npm install`
-2. Copy `.env.example` → `.env` (`VITE_API_BASE_URL`, e.g. `http://localhost:5000/api`)
+2. Copy `.env.example` → `.env` (`VITE_API_BASE_URL`)
 3. `npm run dev`
 
 The backend's `CLIENT_ORIGIN` must include this app's URL (default `http://localhost:5173`).
