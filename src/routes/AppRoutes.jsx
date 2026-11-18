@@ -6,12 +6,14 @@ import Login from '../pages/Login';
 import AdminSignup from '../pages/AdminSignup';
 
 import Error from '../pages/Error';
+import ExamLogin from '../pages/ExamLogin';
 
 
 import Step1SchoolInfo from '../pages/SchoolSetup/Step1SchoolInfo';
 import Step2Arms from '../pages/SchoolSetup/Step2Arms';
 import Step3Classes from '../pages/SchoolSetup/Step3Classes';
 import Step4Subjects from '../pages/SchoolSetup/Step4Subjects';
+import ExamWaiting from '../pages/Student/ExamWaiting';
 
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import Overview from '../pages/Dashboard/Overview';
@@ -38,6 +40,8 @@ import ReviewResults from '../pages/Dashboard/Results/ReviewResults';
 import Homepage from '../pages/Homepage/Homepage';
 import Help from '../pages/Homepage/Help';
 import StudentLogin from '../pages/Student/StudentLogin';
+import ForgotPassword from '../pages/ForgetPassword';
+import ResetPassword from '../pages/ResetPassword';
 
 const ADMIN_ROLES = ['admin', 'super_admin'];
 
@@ -52,7 +56,10 @@ export default function AppRoutes() {
       <Route path="/help" element={<Help />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<AdminSignup />} />
-
+      {/* Reset Password */}
+       <Route path="/forgetPassword" element={<ForgotPassword />} />
+       <Route path="/admin/reset-password/:id" element={<ResetPassword />} />
+       
       {/* School setup wizard (only works while no school exists) */}
       <Route path="/school-setup/info" element={<Step1SchoolInfo fields={question1} />} />
       <Route path="/school-setup/info2" element={<Step1SchoolInfo fields={question2} />} />
@@ -67,21 +74,23 @@ export default function AppRoutes() {
         element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>}
       />
       <Route
-        path="/student/exams"
-        element={<ProtectedRoute allowedRoles={ADMIN_ROLES}><AvailableExams /></ProtectedRoute>}
+        path="/exams/rooms"
+        element={<ProtectedRoute allowedRoles={['exam_operator']} StudentStrict><AvailableExams /></ProtectedRoute>}
       />
       <Route
-        path="/student/exams/instructions"
-        element={<ProtectedRoute allowedRoles={'student'}><ExamInstructions /></ProtectedRoute>}
+        path="/student/exams/:id/instructions"
+        element={<ProtectedRoute allowedRoles={['exam_operator']}><ExamInstructions /></ProtectedRoute>}
       />
       <Route
         path="/student/exams/:id/take"
-        element={<ProtectedRoute allowedRoles={'student'}><TakeExam /></ProtectedRoute>}
+        element={<ProtectedRoute allowedRoles={['exam_operator']}><TakeExam /></ProtectedRoute>}
       />
       <Route
         path="/student/results"
         element={<ProtectedRoute allowedRoles={['student']}><MyResults /></ProtectedRoute>}
       />
+      <Route path="/student/waiting" element={<ProtectedRoute allowedRoles={['student']}><ExamWaiting /></ProtectedRoute>} />
+      <Route path="/Admin/exams/Login" element={<ExamLogin />} />
 
       {/* Admin dashboard */}
       <Route

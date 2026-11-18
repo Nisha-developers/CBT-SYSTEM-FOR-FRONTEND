@@ -45,10 +45,10 @@ export default function StudentDashboard() {
         </div>
         <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-red-600">Log out</button>
       </div>
-      <div className="grid grid-cols-2 gap-4 max-w-md">
-        <Link to="/student/exams" className="bg-white p-5 rounded-lg shadow hover:shadow-md text-center">
+      <div className="grid grid-cols-1 gap-4 max-w-md">
+        {/* <Link to="/student/exams" className="bg-white p-5 rounded-lg shadow hover:shadow-md text-center">
           Available Exams
-        </Link>
+        </Link> */}
         <Link to="/student/results" className="bg-white p-5 rounded-lg shadow hover:shadow-md text-center">
           My Results
         </Link>

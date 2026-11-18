@@ -1,6 +1,7 @@
 import { refreshSession, logoutRequest } from '../api/auth.api';
 import { useAuthStore } from '../store/useAuthStore';
 import { useExamStore } from '../store/useExamStore';
+import { useExamModeStore } from '../store/useExamModeStore';
 
 // After a page reload the access token is gone (memory only). The httpOnly refresh cookie,
 // which JavaScript can't read, gets us a new one. Runs once, no matter how many callers ask.
@@ -21,5 +22,6 @@ export function restoreSession() {
 export async function signOut() {
   try { await logoutRequest(); } catch { /* offline: the cookie will expire on its own */ }
   useExamStore.getState().clearAttempt();
+  useExamModeStore.getState().clear();
   useAuthStore.getState().clearSession();
 }

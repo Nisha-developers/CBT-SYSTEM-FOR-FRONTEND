@@ -84,6 +84,7 @@ const Admin = () => {
 
   // Throws on failure so the form can show the server's message.
   const handleSaveAdmin = async (formData) => {
+    console.log(formModal.mode);
     if (formModal.mode === 'create') {
       await createAdmin({
         name: formData.name, email: formData.email, role: formData.role, password: formData.password,

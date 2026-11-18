@@ -1,16 +1,34 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
+import { useExamModeStore } from '../store/useExamModeStore';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // withCredentials lets the browser send the httpOnly refresh cookie to the API.
 export const bareApi = axios.create({ baseURL, withCredentials: true });   // no interceptors: used for refresh/logout
 const api = axios.create({ baseURL, withCredentials: true });
 
-// ---- attach the in-memory access token ----
 api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().accessToken;
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const authContext = config.authContext || 'default';
+  const authStore = useAuthStore.getState();
+  const examModeStore = useExamModeStore.getState();
+
+  let token;
+  if (authContext === 'examSession') token = examModeStore.examAccessToken;
+  else if (authContext === 'examCandidate') token = examModeStore.candidateAccessToken;
+  else token = authStore.accessToken;
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    delete config.headers.Authorization;
+  }
+
+  // Let the browser set Content-Type (with boundary) for multipart uploads.
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   return config;
 });
 
@@ -38,6 +56,19 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
+    // Exam-specific tokens are not renewed using the normal refresh cookie.
+// The refresh endpoint only renews the normal login session.
+if (
+  original?.authContext === 'examSession' ||
+  original?.authContext === 'examCandidate'
+) {
+  return Promise.reject(error);
+}
+    
+    if (error.response?.status === 403 && error.response.data?.code === 'EXAM_MODE_LOCKED') {
+      useExamModeStore.getState().setMode(error.response.data.examMode);
+      return Promise.reject(error);
+    }
     if (error.response?.status !== 401 || !original || original._retried || isAuthCall(original.url)) {
       return Promise.reject(error);
     }
@@ -56,7 +87,8 @@ api.interceptors.response.use(
       original.headers.Authorization = `Bearer ${token}`;
       return api(original);                      // replay the request that just failed
     } catch (refreshError) {
-      useAuthStore.getState().clearSession();    // refresh token gone/expired → back to the login page
+      useAuthStore.getState().clearSession('Your session has ended. Please log in again.');
+      useExamModeStore.getState().clear();
       return Promise.reject(error);
     }
   }

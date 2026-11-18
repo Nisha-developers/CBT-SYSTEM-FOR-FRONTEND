@@ -9,6 +9,7 @@ import {
   deleteSchool, setAcademicTerm, getAcademicTerms,
 } from '../../../api/school.api';
 import { apiError } from '../../../api/axios';
+import { formatSubjectClassArms } from '../../../utils/subjectAssignments';
 import { 
   Building2, 
   Users, 
@@ -63,14 +64,14 @@ const Settings = () => {
   const arms = store.classArms.map((ca) => ({
     id: ca.id, armId: ca.armId, rawName: ca.armName, name: `Arm ${ca.armName}`, class: ca.className, students: ca.students,
   }));
-  const classArmsLabel = (ids) => {
-    const names = ids.map((id) => store.classArms.find((ca) => ca.id === id)?.fullName).filter(Boolean);
-    return names.length ? names.join(', ') : '—';
-  };
   const subjects = [
     ...store.subjects.map((s2) => ({ ...s2, kind: 'compulsory', type: 'Core' })),
     ...store.optionalSubjects.map((s2) => ({ ...s2, kind: 'optional', type: 'Optional' })),
-  ].map((s2) => ({ ...s2, code: s2.name.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase(), class: classArmsLabel(s2.classArmIds) }));
+  ].map((s2) => ({
+    ...s2,
+    code: s2.name.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase(),
+    class: formatSubjectClassArms(s2.classArmIds, store.classArms),
+  }));
 
   // --- MODAL STATES ---
   const [classModal, setClassModal] = useState({ open: false, mode: 'create', data: null });
@@ -425,17 +426,20 @@ const Settings = () => {
     const kind = subjectModal.mode === 'create'
       ? (formData.type === 'Optional' ? 'optional' : 'compulsory')
       : subjectModal.data.kind;
-    const classArmIds = formData.classArmIds || [];
-    if (!classArmIds.length) throw new Error('Choose at least one class.');
-    const class_arms = classArmIds.map((id) => store.classArms.find((ca) => ca.id === id)?.fullName).filter(Boolean);
+    const classArmIds = [...new Set((Array.isArray(formData.classArmIds) ? formData.classArmIds : []).map(String))];
+    if (!classArmIds.length) throw new Error('Choose at least one class arm.');
+    const classArms = classArmIds
+      .map((id) => store.classArms.find((classArm) => String(classArm.id) === id)?.fullName)
+      .filter(Boolean);
+    if (classArms.length !== classArmIds.length) throw new Error('One or more selected class arms could not be found. Refresh and try again.');
 
     if (subjectModal.mode === 'edit' && subjectModal.data.name !== name) {
       if (kind === 'optional') await renameOptionalSubject(subjectModal.data.id, name);
       else await renameSubject(subjectModal.data.id, name);
     }
     await updateSchool(kind === 'optional'
-      ? { optionalSubjects: [{ subject_name: name, class_arms }] }
-      : { subjects: [{ subject_name: name, class_arms }] });
+      ? { optionalSubjects: [{ subject_name: name, classArms }] }
+      : { subjects: [{ subject_name: name, classArms }] });
     await reload();
     setNotice({ type: 'success', text: subjectModal.mode === 'create' ? 'Subject added.' : 'Subject updated.' });
     handleCloseSubjectModal();
@@ -681,7 +685,7 @@ const Settings = () => {
           fields={[
             { key: 'name', label: 'Subject Name', type: 'text', placeholder: 'e.g. Mathematics' },
             ...(subjectModal.mode === 'create' ? [{ key: 'type', label: 'Type', type: 'select', options: ['Core', 'Optional'] }] : []),
-            { key: 'classArmIds', label: 'Offered in', type: 'multi', options: store.classArms.map((ca) => ({ value: ca.id, label: ca.fullName })) },
+            { key: 'classArmIds', label: 'Offered in', type: 'multi', options: store.classArms.map((classArm) => ({ value: classArm.id, label: classArm.fullName })) },
           ]}
           initialData={subjectModal.data || { name: '', type: 'Core', classArmIds: [] }}
           onClose={handleCloseSubjectModal}

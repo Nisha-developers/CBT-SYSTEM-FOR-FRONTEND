@@ -10,26 +10,13 @@ export default function Step3Classes() {
   const [input, setInput] = useState('');
 
   const [editingClass, setEditingClass] = useState(null);
-  const [error,setError] = useState('')
 
   const addClass = () => {
-    
     if (!input.trim()) return;
   if(isDuplicate(input.trim(), wizard.classes)) return;
     setWizardStep('classes', [...wizard.classes, input.trim()]);
     setInput('');
   };
-  function handleNext(){
-    if(wizard?.classes?.length <= 0){
-      setError('Add at least a class before you can move forward');
-      setTimeout(() => {
-        setError('');
-      }, 3000);
-    }
-    else{
-        navigate('/school-setup/arms')
-    }
-  }
 
   const editClass = (name) => {
     setEditingClass(name);
@@ -68,7 +55,7 @@ const isDuplicate = (value, list) => {
         activeStep={3}
         textContent="Classes(Eg: JSS1, SS2)"
       />
-<div className='text-red-600 pb-3 text-sm'>{error}</div>
+
       <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
 
         <Button
@@ -195,7 +182,7 @@ const isDuplicate = (value, list) => {
 
           <Button
             className=""
-            onClick={handleNext}
+            onClick={() => navigate('/school-setup/arms')}
           >
             Next
           </Button>

@@ -401,19 +401,18 @@ Step 4: Subject Configuration`}</CodeBlock>
           <SubHeading level={4}>Arm Names Are Flexible</SubHeading>
           <Paragraph>
             Arm names are <strong>not restricted</strong> to A, B, C, and so on. The school can use whatever 
-            naming structure suits it, such as Arm A, Arm B, Blue, Gold, Science, Commercial, or any other 
-            appropriate naming convention.
+            naming structure suits it; names are created by the school and are not predefined by the system.
           </Paragraph>
 
           <SubHeading>Step 4: Subject Configuration</SubHeading>
           <Paragraph>
             After classes and arms have been configured, the administrator configures <strong>subjects</strong>. 
-            Subjects are <strong>not automatically assigned to every class</strong>. The administrator decides 
-            which subjects belong to which class.
+            Each subject can be assigned to any combination of existing class arms. Arms in the same class may
+            offer different subjects.
           </Paragraph>
           <List ordered items={[
-            'Select a class (or a class and arm combination).',
-            'Configure the appropriate subjects for that class.',
+            'Select the class arms that offer the subject.',
+            'Repeat for each compulsory or optional subject.',
           ]} />
           <Callout type="note">
             <strong>Important:</strong> Complete all four setup steps before moving on to students and examinations. 
@@ -718,6 +717,10 @@ Results are processed`}</CodeBlock>
             to OBJ examinations. The teacher must have an <strong>examination configuration</strong> before 
             setting the theory examination.
           </Paragraph>
+          <Paragraph>
+            The OBJ and theory percentage marks for the same subject, class, and term must add up to
+            <strong> 100%.</strong> Theory questions do not have individual marks.
+          </Paragraph>
 
           <SubHeading>What the Teacher Can Do</SubHeading>
           <List items={[
@@ -767,7 +770,8 @@ Results are processed`}</CodeBlock>
         <Section id="14-theory-examination-submission" num={14} title="Theory Examination Submission">
           <SubHeading>What the Student Does</SubHeading>
           <Paragraph>
-            For a Theory examination, the student <strong>answers the questions and submits the examination.</strong>
+            For a Theory examination, the student writes answers in a booklet while viewing the questions
+            in the system, then submits the exam online.
           </Paragraph>
 
           <SubHeading>What the System Does</SubHeading>
@@ -777,7 +781,8 @@ Results are processed`}</CodeBlock>
 
           <SubHeading>What the Teacher Does</SubHeading>
           <Paragraph>
-            Theory answers need assessment. The teacher later <strong>updates/enters the student's theory result.</strong>
+            The teacher marks the student's booklet outside the system, then records the final score in
+            the system. The score cannot exceed the theory exam's configured percentage mark.
           </Paragraph>
 
           <SubHeading>Final Result</SubHeading>
@@ -1023,7 +1028,7 @@ STUDENTS
 Add students (Admin or Super Admin)
         ↓
 EXAMINATION CONFIGURATION
-Create / select configuration (date, time, duration, class, arm, subject, type)
+Create / select configuration (date, time, duration, class, subject, type)
         ↓
 QUESTION MANAGEMENT
 OBJ or Theory: import / add → review → update → save → return later

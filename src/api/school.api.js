@@ -1,4 +1,5 @@
 import api from './axios';
+import { groupSubjectAssignments } from '../utils/subjectAssignments';
 
 export const checkSchoolExists = () => api.get('/school/exists');
 export const getPublicSchool = () => api.get('/school/public');
@@ -35,17 +36,6 @@ export function buildSetupPayload(wizard) {
     });
   });
 
-  const group = (list, field) => {
-    const map = new Map();
-    (list || []).forEach((item) => {
-      item[field].forEach((subject) => {
-        if (!map.has(subject)) map.set(subject, []);
-        map.get(subject).push(full(item.className, item.armName));
-      });
-    });
-    return [...map].map(([subject_name, class_arms]) => ({ subject_name, class_arms }));
-  };
-
   return {
     school: {
       name: (info.name || '').trim(),
@@ -60,7 +50,7 @@ export function buildSetupPayload(wizard) {
     classes: wizard.classes || [],
     arms: [...arms],
     classArms,
-    subjects: group(wizard.subjects, 'offerSubject'),
-    optionalSubjects: group(wizard.optionalSubject, 'optionalSubject'),
+    subjects: groupSubjectAssignments(wizard.subjects, 'offerSubject'),
+    optionalSubjects: groupSubjectAssignments(wizard.optionalSubject, 'optionalSubject'),
   };
 }

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { listStudents, addStudent, updateStudent, deleteStudent, resetStudentPassword } from '../../api/student.api';
-import {getPublicSchool} from '../../api/school.api';
 import { apiError } from '../../api/axios';
 import { useSchoolStore } from '../../store/useSchoolStore';
 import Table from '../../components/common/Table';
+import {  getPublicSchool } from '../../api/school.api';
 import Modal from '../../components/common/Modal';
 import Button from '../../components/common/Button';
 import { Search, Trash2, Edit2, ChevronLeft, ChevronRight, Plus, KeyRound } from 'lucide-react';
@@ -15,7 +15,6 @@ const columns = [
   { key: 'class', label: 'Class' },
   { key: 'arm', label: 'Arm' },
 ];
-
 
 const PAGE_SIZE = 10;
 const inputCls =
@@ -34,15 +33,29 @@ export default function Students() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState({ type: '', text: '' });
+  const [school, setSchool] = useState({});
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null); // student being edited (or null = adding)
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState('');
-  const [retunId, setReturnId] = useState('');
   const [saving, setSaving] = useState(false);
-  useEffect(() => {loadSchool().catch(() => {});
-   }, [loadSchool]);
+
+  useEffect(() => { loadSchool().catch(() => {}); }, [loadSchool]);
+
+
+
+useEffect(() => {
+  (async () => {
+    try {
+      const { data} = await getPublicSchool();
+      setSchool(data.school);
+    } catch (err) {
+     console.log(err);
+    }
+  })();
+}, []);  
+
 
   // class arm lookups for the dropdowns
   const armsForClass = useCallback(
@@ -54,7 +67,10 @@ export default function Students() {
     [filterClass, armsForClass, classArms]
   );
   const selectedClassArm = classArms.find((ca) => ca.className === form.className && ca.armName === form.armName);
-  const offeredOptional = optionalSubjects.filter((o) => selectedClassArm && o.classArmIds.includes(selectedClassArm.id));
+  const offeredOptional = optionalSubjects.filter((subject) =>
+    selectedClassArm && Array.isArray(subject.classArmIds) &&
+    subject.classArmIds.some((id) => String(id) === String(selectedClassArm.id))
+  );
 
   const fetchStudents = useCallback(async () => {
     setLoading(true);
@@ -78,64 +94,26 @@ export default function Students() {
       setLoading(false);
     }
   }, [page, filterClass, filterArm, search, classArms]);
-useEffect(() => {
-  if (!form.className || !form.armName) {
-    setReturnId('');
-    return;
-  }
 
-  let cancelled = false;
+function generateStudentId(schoolName, className, armName, existingCount = 0) {
+  const code = (t, n) => (t || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, n).padEnd(n, 'X');
+  const serial = existingCount + 1;
+  return `${code(schoolName, 3)}/${className}/${armName}/${String(serial).padStart(3, '0')}`;
+}
+// existingCount = students already in this class+arm
 
-  async function generateStudentId() {
-    try {
-      const classArmss = classArms;
-      console.log(classArmss);
+function newId() {
+  const { className, armName } = form;
+  if (!className || !armName) return 'generating...';
 
-      const selectedArmDetails = classArmss.find((value) => {
-        return (
-          value.className === form.className &&
-          value.armName === form.armName
-        );
-      });
+  // count students already in this same class + arm
+  const count = students.filter(
+    (s) => s.class === className && s.arm === armName
+  ).length;
 
-      if (!selectedArmDetails) {
-        setReturnId('');
-        return;
-      }
-
-      const count = Number(selectedArmDetails.students ?? 0) + 1;
-      const schoolDetails = await getPublicSchool();
-
-      const schoolName =
-        schoolDetails?.data?.school?.name ?? 'Nisha';
-
-      const studentId = `${schoolName
-        .slice(0, 3)
-        .toUpperCase()}/${form.className}/${form.armName}/${String(count).padStart(3, '0')}`;
-
-      if (!cancelled) {
-        setReturnId(studentId);
-
-        setForm((prev) => ({
-          ...prev,
-          studentId,
-        }));
-      }
-    } catch (error) {
-      console.error('Failed to generate student ID:', error);
-
-      if (!cancelled) {
-        setReturnId('');
-      }
-    }
-  }
-
-  generateStudentId();
-
-  return () => {
-    cancelled = true;
-  };
-}, [form.className, form.armName, classArms]);
+  return generateStudentId(school?.name, className, armName, count);
+}
+// e.g. GRE/JSS 1/A/001  →  GRE/JSS 1/A/002  →  ...
 
   // debounce typing in search; filters/page refetch immediately
   useEffect(() => {
@@ -175,9 +153,13 @@ useEffect(() => {
     setFormError('');
     if (!selectedClassArm) return setFormError('Please choose a class and an arm.');
     const body = {
-      firstName: form.firstName, lastName: form.lastName, studentId: form.studentId,
-      classArmId: selectedClassArm.id, gender: form.gender || null, optionalSubjectIds: form.optionalSubjectIds,
-    };
+  firstName: form.firstName,
+  lastName: form.lastName,
+  studentId: editing ? form.studentId : newId(),
+  classArmId: selectedClassArm.id,
+  gender: form.gender || null,
+  optionalSubjectIds: form.optionalSubjectIds,
+};
     setSaving(true);
     try {
       if (editing) {
@@ -345,7 +327,6 @@ useEffect(() => {
               Last Name
               <input className={inputCls} value={form.lastName} onChange={setField('lastName')} required />
             </label>
-           
             <label className="flex flex-col gap-1.5 text-xs font-medium text-gray-700">
               Class
               <select className={inputCls} value={form.className}
@@ -362,10 +343,14 @@ useEffect(() => {
                 {armsForClass(form.className).map((a) => <option key={a} value={a}>{a}</option>)}
               </select>
             </label>
-
              <label className="flex flex-col gap-1.5 text-xs font-medium text-gray-700 sm:col-span-2">
-              Student ID (Authomatic generated)
-              <input className={inputCls} value={form.className &&form.armName ? `${retunId}` : 'generating...'} onChange={setField('studentId')} required readOnly/>
+              Student ID (auto generated)
+              <input
+  className={inputCls}
+  value={editing ? form.studentId : newId()}
+  required
+  readOnly
+/>
             </label>
             <label className="flex flex-col gap-1.5 text-xs font-medium text-gray-700 sm:col-span-2">
               Gender

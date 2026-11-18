@@ -30,7 +30,7 @@ export default function StudentLogin() {
     try {
       const { data } = await studentLogin(form);
       login(data.accessToken, data.user);
-      navigate('/student/dashboard');
+      navigate('/student/dashboard', { replace: true });
     } catch (err) {
       setError(apiError(err, 'Login failed. Please check your credentials.'));
     } finally {

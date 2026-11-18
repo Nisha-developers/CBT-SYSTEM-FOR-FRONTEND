@@ -7,3 +7,7 @@ scroll-behavior: smooth;
 body{
     font-family: "Montserrat", sans-serif;
 }
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff !important; }
+}

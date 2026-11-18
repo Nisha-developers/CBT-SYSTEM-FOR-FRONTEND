@@ -11,6 +11,7 @@
 // ];
 import React from 'react';
 import {NavLink} from 'react-router-dom'
+import { useAuthStore } from '../../store/useAuthStore';
 import { 
   LayoutDashboard, 
   GraduationCap,
@@ -25,6 +26,12 @@ FilePenLine,
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
+  const { user } = useAuthStore();
+  const currentRole = user?.role
+    ? user.role.split('_').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+    : 'Role unavailable';
+ 
+
   const navItems = [
     { label: 'Overview', icon: LayoutDashboard, to: '/dashboard',  end: true },
     { label: 'Students', icon: GraduationCap, to:'/dashboard/students' },
@@ -87,7 +94,10 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
               <span className="text-white font-bold text-sm">C</span>
             </div>
-            <span className="font-semibold text-gray-900 text-lg tracking-tight">CBT Admin</span>
+            <div className="min-w-0">
+              <span className="block font-semibold text-gray-900 text-lg tracking-tight">CBT Admin</span>
+              <span className="block text-xs text-gray-500">{currentRole}</span>
+            </div>
           </div>
           {/* Main Navigation */}
           <nav className="space-y-1 mb-6">
@@ -175,13 +185,14 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Bottom Section */}
         <div className="p-2 border-gray-700 bottom-0  z-1000000 bg-white">
           <div className="space-y-1">
-           {bottomItems.map((item) => (
+            
+           {bottomItems.map((item, index) => (
   <NavLink
     key={item.label}
     to={item.to}
     end={item.end}
     onClick={onClose}
-    className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+    className={({ isActive }) => ` ${index === 1 && currentRole === 'Admin' ? 'hidden' : 'flex'}  items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
       isActive
         ? 'bg-blue-50 text-blue-700'
         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'

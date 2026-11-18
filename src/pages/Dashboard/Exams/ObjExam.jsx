@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { listExams, setExamOpen, deleteExam } from '../../../api/exam.api';
 import { apiError } from '../../../api/axios';
+import { useSchoolStore } from '../../../store/useSchoolStore';
+import { formatSubjectArmsForClass } from '../../../utils/subjectAssignments';
 import Table from '../../../components/common/Table';
 import Modal from '../../../components/common/Modal';
 import QuestionImport from './QuestionImport.jsx';
@@ -26,7 +28,14 @@ import {
 } from 'lucide-react';
 import SetConfig from './SetConfig.jsx';
 
+const getExamClass = (exam) => typeof exam.class === 'object'
+  ? exam.class?.name ?? exam.class?.className
+  : exam.className ?? exam.class ?? exam.fullClassName;
+
+const getExamClassId = (exam) => exam.classId ?? (typeof exam.class === 'object' ? exam.class?.id : null);
+
 export default function ObjExam() {
+  const { classArms, subjects, optionalSubjects, loadSchool } = useSchoolStore();
   const [exams, setExams] = useState([]);
   const [pageError, setPageError] = useState('');
   const [activeTab, setActiveTab] = useState('config');
@@ -37,7 +46,6 @@ export default function ObjExam() {
   // --- FILTER STATES ---
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('');
-  const [filterArm, setFilterArm] = useState('');
 
   // --- MODAL STATE ---
   const [selectedExam, setSelectedExam] = useState(null);
@@ -54,6 +62,9 @@ export default function ObjExam() {
   }, []);
 
   useEffect(() => { loadExams(); }, [loadExams]);
+  useEffect(() => {
+    loadSchool().catch((err) => setPageError(apiError(err, 'Could not load subject arm assignments.')));
+  }, [loadSchool]);
 
   const sourceExams = exams;
   const handleOpenConfig = () =>{
@@ -70,20 +81,23 @@ export default function ObjExam() {
       const matchesSearch = 
         exam.title?.toLowerCase().includes(search) ||
         exam.subject?.toLowerCase().includes(search);
-      const matchesClass = filterClass ? exam.class === filterClass : true;
-      const matchesArm = filterArm ? exam.arm === filterArm : true;
-      return matchesSearch && matchesClass && matchesArm;
+      const matchesClass = filterClass ? getExamClass(exam) === filterClass : true;
+      return matchesSearch && matchesClass;
     });
-  }, [sourceExams, searchTerm, filterClass, filterArm]);
+  }, [sourceExams, searchTerm, filterClass]);
 
-  const uniqueClasses = [...new Set(sourceExams.map(e => e.class))].sort();
-  const uniqueArms = [...new Set(sourceExams.map(e => e.arm))].sort();
-  const hasActiveFilters = searchTerm || filterClass || filterArm;
+  const uniqueClasses = [...new Set(sourceExams.map(getExamClass).filter(Boolean))].sort();
+  const hasActiveFilters = searchTerm || filterClass;
+  const getExamArms = (exam) => {
+    const subject = [...subjects, ...optionalSubjects].find(
+      (item) => String(item.id) === String(exam.subjectId)
+    );
+    return formatSubjectArmsForClass(subject?.classArmIds, getExamClassId(exam), classArms);
+  };
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setFilterClass('');
-    setFilterArm('');
   };
 
   const handleOpenModal = (exam) => {
@@ -150,7 +164,7 @@ export default function ObjExam() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Objective (OBJ) Exams</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Manage objective exam configurations across all classes and arms.
+            Manage objective exam configurations by class.
           </p>
         </div>
     <Button className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm" onClick={handleOpenConfig}>
@@ -230,21 +244,6 @@ export default function ObjExam() {
               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
             </div>
 
-            {/* Arm Filter */}
-            <div className="relative sm:w-44">
-              <select
-                value={filterArm}
-                onChange={(e) => setFilterArm(e.target.value)}
-                className="w-full appearance-none bg-white border border-gray-200 text-gray-900 text-sm rounded-lg pl-3 pr-9 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors cursor-pointer"
-              >
-                <option value="">All Arms</option>
-                {uniqueArms.map((arm) => (
-                  <option key={arm} value={arm}>Arm {arm}</option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
-            </div>
-
             {/* Clear Filters */}
             {hasActiveFilters && (
               <button
@@ -287,14 +286,12 @@ export default function ObjExam() {
                   </div>
 
                   {/* Quick Info Grid */}
-                  <div className="grid grid-cols-2 gap-3 mb-5">
+                  <div className="grid grid-cols-1 gap-3 mb-5">
                     <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-100">
-                      <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider block">Class</span>
-                      <span className="text-sm font-semibold text-gray-900">{exam.class}</span>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-100">
-                      <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider block">Arm</span>
-                      <span className="text-sm font-semibold text-gray-900">Arm {exam.arm}</span>
+                      <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider block">Class &amp; arms</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {getExamClass(exam)} <span className="font-normal text-gray-600">· {getExamArms(exam)}</span>
+                      </span>
                     </div>
                   </div>
 
@@ -372,9 +369,11 @@ export default function ObjExam() {
               <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                 <div className="flex items-center gap-2 mb-1">
                   <Users className="w-3.5 h-3.5 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500">Class & Arm</span>
+                  <span className="text-xs font-medium text-gray-500">Class &amp; arms</span>
                 </div>
-                <span className="text-sm font-semibold text-gray-900">{selectedExam.class} - Arm {selectedExam.arm}</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {getExamClass(selectedExam)} <span className="font-normal text-gray-600">· {getExamArms(selectedExam)}</span>
+                </span>
               </div>
               <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                 <div className="flex items-center gap-2 mb-1">
@@ -393,16 +392,9 @@ export default function ObjExam() {
               <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                 <div className="flex items-center gap-2 mb-1">
                   <Award className="w-3.5 h-3.5 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500">Total Marks</span>
+                  <span className="text-xs font-medium text-gray-500">Percentage mark</span>
                 </div>
-                <span className="text-sm font-semibold text-gray-900">{selectedExam.totalMarks}</span>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                <div className="flex items-center gap-2 mb-1">
-                  <Target className="w-3.5 h-3.5 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500">Pass Mark</span>
-                </div>
-                <span className="text-sm font-semibold text-gray-900">{selectedExam.passMark}</span>
+                <span className="text-sm font-semibold text-gray-900">{selectedExam.percentageMark}</span>
               </div>
             </div>
           
@@ -444,8 +436,8 @@ export default function ObjExam() {
           </div>
         )}
       </Modal>
-       <Modal open={openConfig} onClose={handleCloseConfig} title='Set Exam Config' size='max-w-4xl' className='w-[90%]'>
-               <SetConfig saveConfig = {handleSetExam}  onClose={handleCloseConfig}/>
+       <Modal open={openConfig} onClose={handleCloseConfig} title='Set Exam Config' size='max-w-4xl lg:ml-64' >
+               <SetConfig  saveConfig = {handleSetExam}  onClose={handleCloseConfig}/>
                   </Modal>
     </div>
   );

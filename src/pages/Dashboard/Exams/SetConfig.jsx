@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSchoolStore } from '../../../store/useSchoolStore';
-import { createExam } from '../../../api/exam.api';
+import { createExam, listExams } from '../../../api/exam.api';
 import { apiError } from '../../../api/axios';
+import { subjectIsOfferedInClass } from '../../../utils/subjectAssignments';
 import { 
   FileText, 
   Users, 
@@ -18,10 +19,34 @@ import {
   Info
 } from 'lucide-react';
 
+const belongsToCurrentTerm = (exam, currentTerm) => {
+  const examTerm = typeof exam.term === 'object' ? exam.term?.term : exam.term;
+  const examSession = typeof exam.session === 'object' ? exam.session?.session : exam.session;
+
+  return (!examTerm || !currentTerm?.term || examTerm === currentTerm.term) &&
+    (!examSession || !currentTerm?.session || examSession === currentTerm.session);
+};
+
+const classMatches = (exam, selectedClass) => {
+  const examClassId = exam.classId ?? (typeof exam.class === 'object' ? exam.class?.id : null);
+  if (examClassId != null && selectedClass?.id != null) {
+    return String(examClassId) === String(selectedClass.id);
+  }
+
+  const examClassName = typeof exam.class === 'string'
+    ? exam.class
+    : exam.className ?? exam.class?.name ?? exam.class?.className ?? exam.fullClassName;
+  return examClassName === selectedClass?.name;
+};
+
 const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
   const isObj = type === 'obj';
-  const { classes, classArms, subjects, optionalSubjects, loadSchool } = useSchoolStore();
+  const { classes, classArms, subjects, optionalSubjects, term: currentTerm, loadSchool } = useSchoolStore();
   useEffect(() => { loadSchool().catch(() => {}); }, [loadSchool]);
+  const counterpartType = isObj ? 'THEORY' : 'OBJ';
+  const [counterpartExams, setCounterpartExams] = useState([]);
+  const [isLoadingCounterparts, setIsLoadingCounterparts] = useState(true);
+  const [counterpartError, setCounterpartError] = useState('');
 
   // --- FORM STATE ---
   const [form, setForm] = useState({
@@ -29,9 +54,8 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
     durationMinutes: '',
     totalQuestions: '',
     questionsToDisplay: '',
-    markPerQuestion: '',
+    percentageMark: '',
     class: '',
-    arm: '',
     subject: '',        // "compulsory:<uid>" or "optional:<uid>"
     passage: false,
     trueOrFalse: false,
@@ -42,18 +66,48 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const armsForClass = useMemo(
-    () => classArms.filter((ca) => ca.className === form.class).map((ca) => ca.armName),
-    [classArms, form.class]
-  );
-  const selectedClassArm = classArms.find((ca) => ca.className === form.class && ca.armName === form.arm);
+  const selectedClass = classes.find((schoolClass) => schoolClass.name === form.class);
   const subjectOptions = useMemo(() => {
-    if (!selectedClassArm) return [];
-    const mine = (list, kind) => list
-      .filter((s) => s.classArmIds.includes(selectedClassArm.id))
+    if (!selectedClass) return [];
+    const mine = (list = [], kind) => (Array.isArray(list) ? list : [])
+      .filter((subject) => subjectIsOfferedInClass(subject, selectedClass, classArms))
       .map((s) => ({ value: `${kind}:${s.id}`, label: kind === 'optional' ? `${s.name} (optional)` : s.name }));
     return [...mine(subjects, 'compulsory'), ...mine(optionalSubjects, 'optional')];
-  }, [selectedClassArm, subjects, optionalSubjects]);
+  }, [selectedClass, classArms, subjects, optionalSubjects]);
+
+  const [subjectKind, subjectId] = form.subject.split(':');
+  const matchingCounterpart = counterpartExams.find((exam) =>
+    classMatches(exam, selectedClass) &&
+    String(exam.subjectId) === String(subjectId) &&
+    exam.subjectKind === subjectKind &&
+    belongsToCurrentTerm(exam, currentTerm)
+  );
+  const counterpartPercentage = Number(matchingCounterpart?.percentageMark);
+  const percentageMark = Number(form.percentageMark);
+  const percentagesDoNotTotal100 = matchingCounterpart && form.percentageMark !== '' &&
+    Number.isFinite(percentageMark) &&
+    Number.isFinite(counterpartPercentage) &&
+    percentageMark + counterpartPercentage !== 100;
+
+  useEffect(() => {
+    let active = true;
+    setIsLoadingCounterparts(true);
+    listExams({ type: counterpartType })
+      .then(({ data }) => {
+        if (active) {
+          setCounterpartExams(data.exams);
+          setCounterpartError('');
+        }
+      })
+      .catch((err) => {
+        if (active) setCounterpartError(apiError(err, 'Could not load matching exam configurations.'));
+      })
+      .finally(() => {
+        if (active) setIsLoadingCounterparts(false);
+      });
+
+    return () => { active = false; };
+  }, [counterpartType]);
 
   // --- HANDLERS ---
   const handleChange = (field, value) => {
@@ -67,28 +121,56 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!selectedClassArm) return setError('Please choose a class and arm.');
-    const [subjectKind, subjectId] = form.subject.split(':');
+    if (!selectedClass) return setError('Please choose a class.');
     if (!subjectId) return setError('Please choose a subject.');
+    const currentMark = Number(form.percentageMark);
+    if (!Number.isFinite(currentMark) || currentMark < 10 || currentMark > 90) {
+      return setError('Percentage mark must be between 10 and 90.');
+    }
+    if (counterpartError) return setError(counterpartError);
+    if (isLoadingCounterparts) return setError('Matching exam configurations are still loading.');
 
     setIsSaving(true);
     try {
-      const { data } = await createExam({
+      const { data: counterpartData } = await listExams({ type: counterpartType });
+      setCounterpartExams(counterpartData.exams);
+      const latestCounterpart = counterpartData.exams.find((exam) =>
+        classMatches(exam, selectedClass) &&
+        String(exam.subjectId) === String(subjectId) &&
+        exam.subjectKind === subjectKind &&
+        belongsToCurrentTerm(exam, currentTerm)
+      );
+      if (latestCounterpart) {
+        const counterpartMark = Number(latestCounterpart.percentageMark);
+        if (!Number.isFinite(counterpartMark)) {
+          setError(`The matching ${isObj ? 'theory' : 'OBJ'} configuration has an invalid percentage mark.`);
+          return;
+        }
+        if (counterpartMark + currentMark !== 100) {
+          setError(`The matching ${isObj ? 'theory' : 'OBJ'} mark is ${latestCounterpart.percentageMark}%. This exam's percentage mark must be ${100 - counterpartMark}% so both marks total 100%.`);
+          return;
+        }
+      }
+
+      const examPayload = {
         type: isObj ? 'OBJ' : 'THEORY',
         title: form.title,
-        classArmId: selectedClassArm.id,
+        classId: selectedClass.id,
         subjectId,
         subjectKind,
-        totalQuestions: Number(form.totalQuestions),
-        questionsToDisplay: isObj ? Number(form.questionsToDisplay) : undefined,
-        markPerQuestion: Number(form.markPerQuestion),
+        percentageMark: Number(form.percentageMark),
         passage: isObj ? form.passage : false,
         trueOrFalse: isObj ? form.trueOrFalse : false,
-        openExam: form.openExam,
+        openExam: isObj ? form.openExam : false,
         durationMinutes: Number(form.durationMinutes),
         date: form.date,
         time: form.time,
-      });
+      };
+      if (isObj) {
+        examPayload.totalQuestions = Number(form.totalQuestions);
+        examPayload.questionsToDisplay = Number(form.questionsToDisplay);
+      }
+      const { data } = await createExam(examPayload);
       saveConfig?.(data.exam);
       onClose?.();
     } catch (err) {
@@ -100,7 +182,7 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
 
   return (
     // Changed from max-w-4xl mx-auto h-[80vh] to a full-height flex column
-    <div className="w-full  flex flex-col max-w-4xl mx-auto space-y-6 h-[80vh]">
+    <div className="w-full flex flex-col max-w-4xl mx-auto space-y-6 h-[80vh]">
       
       {/* --- HEADER SECTION --- */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
@@ -158,23 +240,24 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Total Questions */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5 text-gray-400" />
-                  Total Questions
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="e.g. 50"
-                  value={form.totalQuestions}
-                  onChange={(e) => handleChange('totalQuestions', e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
-                  required
-                />
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {isObj && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-gray-400" />
+                    Total Questions
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 50"
+                    value={form.totalQuestions}
+                    onChange={(e) => handleChange('totalQuestions', e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+                    required
+                  />
+                </div>
+              )}
 
               {isObj && (
               <div className="flex flex-col gap-1.5">
@@ -194,22 +277,34 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
               </div>
 
               )}
-              {/* Mark Per Question */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
                   <Award className="w-3.5 h-3.5 text-gray-400" />
-                  Mark Per Question
+                  Percentage Mark
                 </label>
                 <input
                   type="number"
-                  min="0.5"
-                  step="0.5"
-                  placeholder="e.g. 2"
-                  value={form.markPerQuestion}
-                  onChange={(e) => handleChange('markPerQuestion', e.target.value)}
+                  min="10"
+                  max="90"
+                  placeholder="e.g. 50%"
+                  value={form.percentageMark}
+                  onChange={(e) => handleChange('percentageMark', e.target.value)}
                   className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
                   required
                 />
+                <p className="text-xs text-gray-500">
+                  For the same subject, class, and term, OBJ and theory percentage marks must total 100%.
+                  {matchingCounterpart && Number.isFinite(counterpartPercentage) && (
+                    <> Matching {isObj ? 'theory' : 'OBJ'} mark: {counterpartPercentage}%. This mark must be {100 - counterpartPercentage}%.</>
+                  )}
+                  {isLoadingCounterparts && ' Loading matching exam configurations…'}
+                  {counterpartError && <span className="text-red-600"> {counterpartError}</span>}
+                </p>
+                {percentagesDoNotTotal100 && (
+                  <p className="text-xs text-red-600" role="alert">
+                    The two percentage marks must total exactly 100%.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -232,7 +327,7 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
                 </label>
                 <select
                   value={form.class}
-                  onChange={(e) => setForm((p) => ({ ...p, class: e.target.value, arm: '', subject: '' }))}
+                  onChange={(e) => setForm((p) => ({ ...p, class: e.target.value, subject: '' }))}
                   className="w-full appearance-none bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors cursor-pointer"
                   required
                 >
@@ -241,25 +336,8 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
                 </select>
               </div>
 
-              {/* Arm */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-gray-400" />
-                  Arm
-                </label>
-                <select
-                  value={form.arm}
-                  onChange={(e) => setForm((p) => ({ ...p, arm: e.target.value, subject: '' }))}
-                  className="w-full appearance-none bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors cursor-pointer"
-                  required
-                >
-                  <option value="">Select Arm</option>
-                  {armsForClass.map((a) => <option key={a} value={a}>Arm {a}</option>)}
-                </select>
-              </div>
-
               {/* Subject */}
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1.5 md:col-span-2">
                 <label className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
                   <BookOpen className="w-3.5 h-3.5 text-gray-400" />
                   Subject
@@ -275,6 +353,9 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
                 </select>
               </div>
             </div>
+            <p className="mt-3 text-xs text-gray-500">
+              Subject options include assignments to at least one arm in this class. The exam configuration is shared by all arms offering the subject.
+            </p>
           </div>
 
           {isObj && (
@@ -383,23 +464,29 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
               <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Exam Status</h2>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-blue-50/50 rounded-lg border border-blue-100">
-              <div>
-                <span className="text-sm font-medium text-gray-900">Open Exam</span>
-                <p className="text-xs text-gray-500 mt-0.5">Make this exam available to students immediately.</p>
+            {isObj ? (
+              <div className="flex items-center justify-between p-4 bg-blue-50/50 rounded-lg border border-blue-100">
+                <div>
+                  <span className="text-sm font-medium text-gray-900">Open Exam</span>
+                  <p className="text-xs text-gray-500 mt-0.5">Make this exam available to students immediately.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleToggle('openExam')}
+                  className="focus:outline-none"
+                >
+                  {form.openExam ? (
+                    <ToggleRight className="w-8 h-8 text-blue-600" />
+                  ) : (
+                    <ToggleLeft className="w-8 h-8 text-gray-300" />
+                  )}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => handleToggle('openExam')}
-                className="focus:outline-none"
-              >
-                {form.openExam ? (
-                  <ToggleRight className="w-8 h-8 text-blue-600" />
-                ) : (
-                  <ToggleLeft className="w-8 h-8 text-gray-300" />
-                )}
-              </button>
-            </div>
+            ) : (
+              <p className="text-sm text-gray-500 bg-blue-50/50 rounded-lg border border-blue-100 p-4">
+                Theory exams can be opened after at least one question has been added.
+              </p>
+            )}
           </div>
 
         </div>
@@ -416,7 +503,7 @@ const SetConfig = ({ type = 'obj', saveConfig, onClose }) => {
           </button>
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={isSaving || isLoadingCounterparts || Boolean(counterpartError) || Boolean(percentagesDoNotTotal100)}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? (

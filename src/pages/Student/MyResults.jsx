@@ -111,9 +111,11 @@ export default function MyResults() {
     return styles[grade] || 'bg-gray-50 text-gray-600 border-gray-100';
   };
 
+  const getResultMaxScore = (result) => result.Exam?.percentageMark ?? result.maxScore;
+
   const calcTermAverage = (termResults) => {
     if (!termResults.length) return 0;
-    const total = termResults.reduce((sum, r) => sum + (r.score / r.maxScore) * 100, 0);
+    const total = termResults.reduce((sum, r) => sum + (r.score / getResultMaxScore(r)) * 100, 0);
     return (total / termResults.length).toFixed(1);
   };
 
@@ -256,7 +258,8 @@ export default function MyResults() {
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
                                   {termResults.map((r) => {
-                                    const grade = getGrade(r.score, r.maxScore);
+                                    const maxScore = getResultMaxScore(r);
+                                    const grade = getGrade(r.score, maxScore);
                                     return (
                                       <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="px-4 py-3">
@@ -265,8 +268,8 @@ export default function MyResults() {
                                           </span>
                                         </td>
                                         <td className="px-4 py-3 text-center">
-                                          <span className={`text-sm font-semibold ${getScoreColor(r.score, r.maxScore)}`}>
-                                            {r.score}/{r.maxScore}
+                                          <span className={`text-sm font-semibold ${getScoreColor(r.score, maxScore)}`}>
+                                            {r.score}/{maxScore}
                                           </span>
                                         </td>
                                         <td className="px-4 py-3 text-center">

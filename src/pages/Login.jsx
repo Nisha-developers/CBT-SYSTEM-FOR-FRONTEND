@@ -123,7 +123,7 @@ export default function Login() {
                   </button>
                 </div>
               </div>
-
+  <i className='text-xs pt-2'><Link className='flex justify-end pt-3 hover:text-blue-600 duration-500' to={'/ForgetPassword'}>Forget Password</Link></i>
              
 
               {/* Submit Button */}
@@ -144,7 +144,7 @@ export default function Login() {
                   </>
                 )}
               </Button>
-
+     
             </form>
 
           </div>

@@ -136,7 +136,7 @@ export default function Homepage() {
                 >
                   <div className="aspect-[16/9] overflow-hidden rounded-lg bg-gray-100 mb-4">
                     <img 
-                      src="https://uonbi.ac.ke/sites/default/files/61st_Graduation_Ceremony_September_2019_8640.jpg" 
+                      src="https://images.unsplash.com/photo-1620831468075-db24ca183258?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D" 
                       alt="School Management"
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
@@ -285,7 +285,7 @@ export default function Homepage() {
               title: 'Set Up Your School',
               desc: 'Configure your school name, classes, arms, and subjects in minutes.',
               helpId: '3-initial-school-setup',
-              img: 'https://unsplash.com/photos/person-typing-on-a-laptop-at-a-wooden-desk-y4h0lH6QxhY',
+              img: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D',
             },
             {
               tag: 'Step 02',

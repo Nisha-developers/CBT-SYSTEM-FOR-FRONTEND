@@ -1,7 +1,7 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { signOut } from '../../utils/session';
-import { Menu, ChevronDown } from 'lucide-react';
+import { Menu, Bell, ChevronDown } from 'lucide-react';
 
 export default function Header({ openNav }) {
   const navigate = useNavigate();
@@ -41,8 +41,13 @@ export default function Header({ openNav }) {
       <div className="flex items-center gap-3 lg:gap-5">
         
         {/* Notification Bell */}
-        <Link className='cursor-pointer hover:text-blue-600 hover:bg-gray-500/20 p-2 rounded-md duration-200' to={'/student/exams'}>Open Exam</Link>
-
+        <Link to='admin/exams/Login'>
+        <button 
+          className="relative p-2 text-gray-400 hover:text-gray-600 text-sm hover:bg-gray-50 rounded-lg transition-colors"
+          aria-label="Notifications"
+        >Open Exam
+        </button>
+        </Link>
 
         {/* Divider */}
         <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
