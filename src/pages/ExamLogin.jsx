@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { examAdminLogin } from '../api/auth.api';
 import { apiError } from '../api/axios';
@@ -13,6 +13,7 @@ export default function ExamLogin() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [isSmallScreen, setIsSmallScreen] = useState(() =>  window.innerWidth <= 1024);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -21,13 +22,38 @@ export default function ExamLogin() {
     try {
       const { data } = await examAdminLogin(form);
       login(data.accessToken, data.user);
-      navigate('/exams/rooms');
+     navigate('/exams/rooms', { state: { authorize: true } });
     } catch (err) {
       setError(apiError(err, 'Login failed'));
     } finally {
       setIsSubmitting(false);
     }
   };
+   useEffect(() => {
+    const onResize = () => setIsSmallScreen(window.innerWidth <= 1024);
+    onResize(); // sync on mount
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  if (isSmallScreen) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-xl p-8 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="w-14 h-14 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center">
+              <ShieldCheck className="w-7 h-7 text-blue-600" />
+            </div>
+          </div>
+          <h1 className="text-xl font-bold text-gray-900">Desktop required</h1>
+          <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+           This examination system is not available on small screens. Please
+            open it on a laptop, desktop, or a tablet in landscape mode
+          </p>
+        </div>
+      </div>
+    );
+  }
+ 
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 lg:p-6">

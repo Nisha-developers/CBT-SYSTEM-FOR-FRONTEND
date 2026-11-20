@@ -41,7 +41,7 @@ export default function Header({ openNav }) {
       <div className="flex items-center gap-3 lg:gap-5">
         
         {/* Notification Bell */}
-        <Link to='admin/exams/Login'>
+        <Link to='/admin/exams/Login'>
         <button 
           className="relative p-2 text-gray-400 hover:text-gray-600 text-sm hover:bg-gray-50 rounded-lg transition-colors"
           aria-label="Notifications"

@@ -225,7 +225,7 @@ useEffect(() => {
       await loadExamMode();
     }
     useExamModeStore.getState().clearCandidateAccessToken();
-    navigate('/student/dashboard', { replace: true });
+    navigate('/student/completed/exam', { replace: true });
   };
 
   const studentName = activeAttempt?.studentName || '';

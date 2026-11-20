@@ -42,6 +42,7 @@ import Help from '../pages/Homepage/Help';
 import StudentLogin from '../pages/Student/StudentLogin';
 import ForgotPassword from '../pages/ForgetPassword';
 import ResetPassword from '../pages/ResetPassword';
+import ExamCompleted from '../pages/Student/ExamCompleted';
 
 const ADMIN_ROLES = ['admin', 'super_admin'];
 
@@ -84,6 +85,10 @@ export default function AppRoutes() {
       <Route
         path="/student/exams/:id/take"
         element={<ProtectedRoute allowedRoles={['exam_operator']}><TakeExam /></ProtectedRoute>}
+      />
+      <Route
+        path="student/completed/exam"
+        element={<ProtectedRoute allowedRoles={['exam_operator']}><ExamCompleted /></ProtectedRoute>}
       />
       <Route
         path="/student/results"

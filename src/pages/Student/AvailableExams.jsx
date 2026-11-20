@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { availableExams, OpenExam } from '../../api/exam.api';
 import { apiError } from '../../api/axios';
 import Button from '../../components/common/Button';
@@ -130,6 +130,12 @@ useEffect(() => {
 }, []);
 
   const isComplete = selectedClass && selectedSubject && selectedType;
+  const location = useLocation();
+const authorize = location.state?.authorize;
+console.log(authorize);
+if(!authorize){
+  navigate('/admin/exams/Login')
+}
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 lg:p-6">

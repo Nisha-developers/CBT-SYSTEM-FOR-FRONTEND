@@ -210,22 +210,7 @@ useEffect(() => {
   const studentName = activeAttempt?.studentName || '';
   const studentId = activeAttempt?.studentId || '';
   if (submitted) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-xl border border-emerald-100 shadow-sm p-6 text-center space-y-4">
-          <div className="mx-auto w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
-            <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-          </div>
-          <h1 className="text-xl font-semibold text-gray-900">Exam submitted</h1>
-          <p className="text-sm text-gray-600">
-            Your theory exam is complete. Write your answers in your booklet and submit it to your teacher for marking.
-          </p>
-          <Button type="button" onClick={() => navigate('/student/dashboard', { replace: true })}>
-            Return to dashboard
-          </Button>
-        </div>
-      </div>
-    );
+    navigate('/student/completed/exam', { replace: true })
   }
 
   return (
