@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { listExams, setExamOpen, deleteExam } from '../../../api/exam.api';
+import { listExams, setExamOpen, deleteExam, setExamOptions } from '../../../api/exam.api';
 import { apiError } from '../../../api/axios';
 import { useSchoolStore } from '../../../store/useSchoolStore';
 import { formatSubjectArmsForClass } from '../../../utils/subjectAssignments';
@@ -33,6 +33,7 @@ const getExamClass = (exam) => typeof exam.class === 'object'
   : exam.className ?? exam.class ?? exam.fullClassName;
 
 const getExamClassId = (exam) => exam.classId ?? (typeof exam.class === 'object' ? exam.class?.id : null);
+
 
 export default function ObjExam() {
   const { classArms, subjects, optionalSubjects, loadSchool } = useSchoolStore();
@@ -123,6 +124,16 @@ export default function ObjExam() {
   const handleToggleOpen = async () => {
     try {
       const { data } = await setExamOpen(selectedExam.id, !selectedExam.openExam);
+      setSelectedExam(data.exam);
+      loadExams();
+    } catch (err) {
+      setPageError(apiError(err));
+    }
+  };
+const handleToggleOptions = async (patch) => { 
+    if (!selectedExam) return;
+    try {
+      const { data } = await setExamOptions(selectedExam.id, patch);
       setSelectedExam(data.exam);
       loadExams();
     } catch (err) {
@@ -415,7 +426,18 @@ export default function ObjExam() {
               </button>
               <button onClick={handleDeleteExam} className="text-red-600 hover:underline">Delete exam</button>
             </div>
-
+<div className="flex items-center justify-between text-xs bg-gray-50 rounded-lg p-3 border border-gray-100">
+  <span>Passage mode</span>
+  <button onClick={() => handleToggleOptions({ passage: !selectedExam.passage })} className="text-blue-600 hover:underline">
+    {selectedExam.passage ? 'On' : 'Off'}
+  </button>
+</div>
+<div className="flex items-center justify-between text-xs bg-gray-50 rounded-lg p-3 border border-gray-100">
+  <span>True/False mode</span>
+  <button onClick={() => handleToggleOptions({ trueOrFalse: !selectedExam.trueOrFalse })} className="text-blue-600 hover:underline">
+    {selectedExam.trueOrFalse ? 'On' : 'Off'}
+  </button>
+</div>
             {/* --- ACTION BUTTONS --- */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button

@@ -10,7 +10,10 @@ export const deleteExam = (id) => api.delete(`/exams/${id}`);
 export const listQuestions = (examId) => api.get(`/exams/${examId}/questions`);
 export const addQuestion = (examId, data) => api.post(`/exams/${examId}/questions`, data);
 export const deleteQuestion = (examId, questionUid) => api.delete(`/exams/${examId}/questions/${questionUid}`);
-
+export const setExamOptions = (id, data) => api.put(`/exams/${id}/options`, data);
+export const createPassage = (examId, data) => api.post(`/exams/${examId}/passages`, data);
+export const updatePassage = (examId, passageUid, data) => api.put(`/exams/${examId}/passages/${passageUid}`, data);
+export const deletePassage = (examId, passageUid) => api.delete(`/exams/${examId}/passages/${passageUid}`);
 export const importQuestions = (examId, file) => {
   const form = new FormData();
   form.append('file', file);

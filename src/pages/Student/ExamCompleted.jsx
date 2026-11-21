@@ -59,6 +59,20 @@ export default function ExamCompleted({
     if (typeof onReturn === 'function') return onReturn();
     navigate('/student/dashboard');
   };
+  useEffect(() => {
+  // Prevent returning to the previous exam page.
+  window.history.pushState(null, '', window.location.href);
+
+  const handlePopState = () => {
+    navigate('/admin/exams/Login', { replace: true });
+  };
+
+  window.addEventListener('popstate', handlePopState);
+
+  return () => {
+    window.removeEventListener('popstate', handlePopState);
+  };
+}, [navigate]);
 
   return (
     <div className="mx-auto w-full flex items-center h-[100vh] max-w-3xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">

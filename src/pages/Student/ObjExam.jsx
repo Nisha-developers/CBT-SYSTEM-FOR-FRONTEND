@@ -36,7 +36,7 @@ export default function ObjExam() {
   const submittingRef = useRef(false);
   const heartbeatInFlightRef = useRef(false);
   const restoringAttemptRef = useRef(false);
-const [connectionPaused, setConnectionPaused] = useState(false);
+  const [connectionPaused, setConnectionPaused] = useState(false);
   const [exam, setExam] = useState(null);
   const [index, setIndex] = useState(0);
 
@@ -45,115 +45,114 @@ const [connectionPaused, setConnectionPaused] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   useEffect(() => {
-  let cancelled = false;
+    let cancelled = false;
 
-  const loadExam = async () => {
-    try {
-      const examModeStore = useExamModeStore.getState();
+    const loadExam = async () => {
+      try {
+        const examModeStore = useExamModeStore.getState();
 
-      // Restore the candidate session if the token disappeared.
-            // After a refresh the exam tokens are gone: go back through the exam room
-      // (operator opens the exam, student enters their ID). The time is already paused.
-      if (!examModeStore.candidateAccessToken) {
-        examModeStore.setMode(null);
-        navigate('/exams/rooms', { replace: true });
-        return;
-      }
+        // Restore the candidate session if the token disappeared.
+        // After a refresh the exam tokens are gone: go back through the exam room
+        // (operator opens the exam, student enters their ID). The time is already paused.
+        if (!examModeStore.candidateAccessToken) {
+          examModeStore.setMode(null);
+          navigate('/exams/rooms', { replace: true });
+          return;
+        }
 
-      // Load the exam using the candidate token.
-      const { data } = await getExam(id);
+        // Load the exam using the candidate token.
+        const { data } = await getExam(id);
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      setExam(data.exam);
-      setActiveAttempt(data.attempt);
-      setTimeRemaining(data.attempt.remainingSeconds);
-
-    } catch (err) {
-      if (!cancelled) {
-        setLoadError(
-          apiError(err, 'Could not restore or open this exam.')
-        );
-      }
-    }
-  };
-
-  loadExam();
-
-  return () => {
-    cancelled = true;
-  };
-
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [id]);
-
-useEffect(() => {
-  const attemptId = activeAttempt?.id;
-
-  if (!exam || !attemptId) return;
-
-  const heartbeat = async () => {
-    if (heartbeatInFlightRef.current) return;
-
-    heartbeatInFlightRef.current = true;
-
-    try {
-      const { data } = await sendHeartbeat(attemptId);
-
-      if (data.active === false && !restoringAttemptRef.current) {
-        restoringAttemptRef.current = true;
-        setConnectionPaused(true);
-
-                try {
-          const { data: resumed } = await resumeAttempt(attemptId);
-
-          if (resumed.resumed) {
-            if (resumed.candidateAccessToken) {
-              useExamModeStore.getState().setCandidateAccessToken(resumed.candidateAccessToken);
-            }
-            setTimeRemaining(resumed.remainingSeconds);
-            setConnectionPaused(false);
-          } else if (resumed.remainingSeconds === 0) {
-            setTimeRemaining(0);          // time ran out while paused → auto-submit
-            setConnectionPaused(false);
-          }
-        } catch (err) {
-          // Stay paused; the next heartbeat retries.
-        } finally {
-          restoringAttemptRef.current = false;
+        setExam(data.exam);
+        setActiveAttempt(data.attempt);
+        setTimeRemaining(data.attempt.remainingSeconds);
+      } catch (err) {
+        if (!cancelled) {
+          setLoadError(apiError(err, 'Could not restore or open this exam.'));
         }
       }
-    } catch (err) {
-      // Connection errors are handled by the next heartbeat.
-    } finally {
-      heartbeatInFlightRef.current = false;
-    }
-  };
+    };
 
-  heartbeat();
+    loadExam();
 
-  const interval = setInterval(heartbeat, 15000);
+    return () => {
+      cancelled = true;
+    };
 
-  return () => clearInterval(interval);
-}, [activeAttempt?.id, exam]);
-useEffect(() => {
-  const attemptId = activeAttempt?.id;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
-  if (!exam || !attemptId) return;
+  useEffect(() => {
+    const attemptId = activeAttempt?.id;
 
-  const handlePageHide = () => {
-    // Best-effort request to pause the exam before leaving.
-    pauseAttempt(attemptId).catch(() => {
-      // The backend's 45-second heartbeat timeout is the fallback.
-    });
-  };
+    if (!exam || !attemptId) return;
 
-  window.addEventListener('pagehide', handlePageHide);
+    const heartbeat = async () => {
+      if (heartbeatInFlightRef.current) return;
 
-  return () => {
-    window.removeEventListener('pagehide', handlePageHide);
-  };
-}, [activeAttempt?.id, exam]);
+      heartbeatInFlightRef.current = true;
+
+      try {
+        const { data } = await sendHeartbeat(attemptId);
+
+        if (data.active === false && !restoringAttemptRef.current) {
+          restoringAttemptRef.current = true;
+          setConnectionPaused(true);
+
+          try {
+            const { data: resumed } = await resumeAttempt(attemptId);
+
+            if (resumed.resumed) {
+              if (resumed.candidateAccessToken) {
+                useExamModeStore.getState().setCandidateAccessToken(resumed.candidateAccessToken);
+              }
+              setTimeRemaining(resumed.remainingSeconds);
+              setConnectionPaused(false);
+            } else if (resumed.remainingSeconds === 0) {
+              setTimeRemaining(0); // time ran out while paused → auto-submit
+              setConnectionPaused(false);
+            }
+          } catch (err) {
+            // Stay paused; the next heartbeat retries.
+          } finally {
+            restoringAttemptRef.current = false;
+          }
+        }
+      } catch (err) {
+        // Connection errors are handled by the next heartbeat.
+      } finally {
+        heartbeatInFlightRef.current = false;
+      }
+    };
+
+    heartbeat();
+
+    const interval = setInterval(heartbeat, 15000);
+
+    return () => clearInterval(interval);
+  }, [activeAttempt?.id, exam]);
+
+  useEffect(() => {
+    const attemptId = activeAttempt?.id;
+
+    if (!exam || !attemptId) return;
+
+    const handlePageHide = () => {
+      // Best-effort request to pause the exam before leaving.
+      pauseAttempt(attemptId).catch(() => {
+        // The backend's 45-second heartbeat timeout is the fallback.
+      });
+    };
+
+    window.addEventListener('pagehide', handlePageHide);
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide);
+    };
+  }, [activeAttempt?.id, exam]);
+
   const displayExam = exam || { questions: [] };
   const questions = displayExam.questions || [];
   const question = questions[index];
@@ -168,7 +167,8 @@ useEffect(() => {
       setTimeRemaining((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
-  }, [timeRemaining,connectionPaused]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRemaining, connectionPaused]);
 
   const formatTime = (seconds) => {
     if (seconds === null) return '--:--';
@@ -304,14 +304,19 @@ useEffect(() => {
                 </div>
 
                 <div className="p-5 lg:p-8">
-                  {question.passage && (
-                    <div className="mb-5 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Passage</p>
-                      <HtmlBlock html={question.passage} className="text-sm text-gray-800 leading-relaxed" />
+                  {/* Passage stays visible for every question that belongs to it */}
+                  {question.passageUid && (
+                    <div className="mb-5 p-4 bg-gray-50 border border-gray-200 rounded-lg sticky top-20 z-10 max-h-64 overflow-y-auto">
+                      {question.passageTitle ? (
+                        <p className="text-sm font-semibold text-gray-900 mb-2">{question.passageTitle}</p>
+                      ) : (
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Passage</p>
+                      )}
+                      <HtmlBlock html={question.passageBody} className="text-sm text-gray-800 leading-relaxed" />
                     </div>
                   )}
 
-                  {/* Question stem — now rich HTML */}
+                  {/* Question stem — rich HTML */}
                   <HtmlBlock
                     html={question.text}
                     className="text-base lg:text-lg font-medium text-gray-900 leading-relaxed mb-6"
@@ -345,7 +350,7 @@ useEffect(() => {
                             {key}
                           </div>
 
-                          {/* Option — now rich HTML */}
+                          {/* Option — rich HTML */}
                           <HtmlBlock
                             html={text}
                             className={`flex-1 text-sm leading-relaxed pt-1 ${
