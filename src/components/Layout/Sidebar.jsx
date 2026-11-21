@@ -39,7 +39,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   ];
 
   const Exam = [
-    { label: 'Obj', icon: ClipboardCheck, to: '/dashboard/exams/obj'},
+    { label: 'OBJ', icon: ClipboardCheck, to: '/dashboard/exams/obj'},
     { label: 'Theory', icon: FilePenLine, to: '/dashboard/exams/theory'},
   ];
   const Results = [

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { listExams, setExamOpen, deleteExam, setExamOptions } from '../../../api/exam.api';
+import { listExams, setExamOpen, deleteExam, setExamOptions, getExamAdmin } from '../../../api/exam.api';
 import { apiError } from '../../../api/axios';
 import { useSchoolStore } from '../../../store/useSchoolStore';
 import { formatSubjectArmsForClass } from '../../../utils/subjectAssignments';
@@ -8,12 +8,12 @@ import Table from '../../../components/common/Table';
 import Modal from '../../../components/common/Modal';
 import QuestionImport from './QuestionImport.jsx';
 import Button from '../../../components/common/Button';
-import { 
-  Settings, 
-  FileText, 
-  ClipboardList, 
-  Plus, 
-  ChevronDown, 
+import {
+  Settings,
+  FileText,
+  ClipboardList,
+  Plus,
+  ChevronDown,
   MoreHorizontal,
   Search,
   X,
@@ -24,7 +24,7 @@ import {
   Award,
   Target,
   ArrowRight,
-  Eye
+  Eye,
 } from 'lucide-react';
 import SetConfig from './SetConfig.jsx';
 
@@ -34,7 +34,6 @@ const getExamClass = (exam) => typeof exam.class === 'object'
 
 const getExamClassId = (exam) => exam.classId ?? (typeof exam.class === 'object' ? exam.class?.id : null);
 
-
 export default function ObjExam() {
   const { classArms, subjects, optionalSubjects, loadSchool } = useSchoolStore();
   const [exams, setExams] = useState([]);
@@ -43,7 +42,6 @@ export default function ObjExam() {
   const [disableQuestion, setDisableQuestion] = useState(false);
   const [openConfig, openSetConfig] = useState(false);
 
-  
   // --- FILTER STATES ---
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('');
@@ -51,6 +49,7 @@ export default function ObjExam() {
   // --- MODAL STATE ---
   const [selectedExam, setSelectedExam] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalError, setModalError] = useState('');
 
   const loadExams = useCallback(async () => {
     try {
@@ -68,18 +67,14 @@ export default function ObjExam() {
   }, [loadSchool]);
 
   const sourceExams = exams;
-  const handleOpenConfig = () =>{
-    openSetConfig(true);
-  }
-   const handleCloseConfig = () =>{
-    openSetConfig(false);
-  }
+  const handleOpenConfig = () => { openSetConfig(true); };
+  const handleCloseConfig = () => { openSetConfig(false); };
 
   // --- FILTERING LOGIC ---
   const filteredExams = useMemo(() => {
     return sourceExams.filter((exam) => {
       const search = searchTerm.toLowerCase();
-      const matchesSearch = 
+      const matchesSearch =
         exam.title?.toLowerCase().includes(search) ||
         exam.subject?.toLowerCase().includes(search);
       const matchesClass = filterClass ? getExamClass(exam) === filterClass : true;
@@ -102,6 +97,7 @@ export default function ObjExam() {
   };
 
   const handleOpenModal = (exam) => {
+    setModalError('');
     setSelectedExam(exam);
     setIsModalOpen(true);
   };
@@ -109,12 +105,22 @@ export default function ObjExam() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedExam(null);
+    setModalError('');
   };
 
   // Called after a new config is saved (with the created exam) or from the details modal.
-  const handleSetExam = (exam) => {
+  // R1 fix: fetch the full admin payload (with passages + questions) so QuestionImport
+  // gets everything immediately, not just the thin list shape().
+  const handleSetExam = async (exam) => {
     const target = exam && exam.id ? exam : selectedExam;
-    setSelectedExam(target);
+    if (!target?.id) return;
+    try {
+      const { data } = await getExamAdmin(target.id);
+      setSelectedExam(data.exam);
+    } catch {
+      // Fall back to the thin object if the full fetch fails.
+      setSelectedExam(target);
+    }
     setDisableQuestion(true);
     setIsModalOpen(false);
     setActiveTab('questions');
@@ -130,14 +136,17 @@ export default function ObjExam() {
       setPageError(apiError(err));
     }
   };
-const handleToggleOptions = async (patch) => { 
+
+  // R2 fix: guard against no selection, and surface error inline in the modal.
+  const handleToggleOptions = async (patch) => {
     if (!selectedExam) return;
+    setModalError('');
     try {
       const { data } = await setExamOptions(selectedExam.id, patch);
       setSelectedExam(data.exam);
       loadExams();
     } catch (err) {
-      setPageError(apiError(err));
+      setModalError(apiError(err));
     }
   };
 
@@ -166,10 +175,12 @@ const handleToggleOptions = async (patch) => {
     );
   };
 
+  const toggleDisabled = !!selectedExam?.hasAttempts;
+
   return (
     <div className="space-y-6">
       {pageError && <div className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{pageError}</div>}
-      
+
       {/* --- HEADER SECTION --- */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -178,16 +189,16 @@ const handleToggleOptions = async (patch) => {
             Manage objective exam configurations by class.
           </p>
         </div>
-    <Button className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm" onClick={handleOpenConfig}>
-            <Plus className="w-4 h-4" />
-            Create Exam Config
-          </Button>
+        <Button className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm" onClick={handleOpenConfig}>
+          <Plus className="w-4 h-4" />
+          Create Exam Config
+        </Button>
       </div>
 
       {/* --- TABS --- */}
       <div className="bg-white rounded-xl border border-gray-200 p-1.5 shadow-sm inline-flex flex-wrap gap-1">
         <button
-          onClick={() => {setActiveTab('config'); setDisableQuestion(false)}}
+          onClick={() => { setActiveTab('config'); setDisableQuestion(false); }}
           className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
             activeTab === 'config' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
           }`}
@@ -197,10 +208,10 @@ const handleToggleOptions = async (patch) => {
         </button>
         <button
           onClick={() => setActiveTab('questions')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg ${disableQuestion? 'cursor-pointer' : 'cursor-not-allowed'} transition-colors ${
-            activeTab === 'questions' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900}'
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg ${disableQuestion ? 'cursor-pointer' : 'cursor-not-allowed'} transition-colors ${
+            activeTab === 'questions' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
           }`}
-       disabled = {!disableQuestion}
+          disabled={!disableQuestion}
         >
           <FileText className="w-4 h-4" />
           Manage Questions
@@ -210,8 +221,6 @@ const handleToggleOptions = async (patch) => {
       {/* --- TAB CONTENT: EXAM CONFIGURATION --- */}
       {activeTab === 'config' && (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          
-          {/* Card Header */}
           <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Exam Configuration</h2>
@@ -224,9 +233,7 @@ const handleToggleOptions = async (patch) => {
             </span>
           </div>
 
-          {/* --- SEARCH & FILTER BAR --- */}
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex flex-col lg:flex-row gap-3">
-            {/* Search Input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
               <input
@@ -237,10 +244,7 @@ const handleToggleOptions = async (patch) => {
                 className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
               />
             </div>
-            {/* Set active tab */}
-            
 
-            {/* Class Filter */}
             <div className="relative sm:w-44">
               <select
                 value={filterClass}
@@ -255,7 +259,6 @@ const handleToggleOptions = async (patch) => {
               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-3 pointer-events-none" />
             </div>
 
-            {/* Clear Filters */}
             {hasActiveFilters && (
               <button
                 onClick={handleClearFilters}
@@ -267,16 +270,14 @@ const handleToggleOptions = async (patch) => {
             )}
           </div>
 
-          {/* --- LIST VIEW (Tiles) --- */}
           {filteredExams.length > 0 ? (
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {filteredExams.map((exam) => (
-                <div 
-                  key={exam.id} 
+                <div
+                  key={exam.id}
                   className="group bg-white rounded-xl border border-gray-200 p-5 hover:border-blue-200 hover:shadow-md transition-all cursor-pointer"
                   onClick={() => handleOpenModal(exam)}
                 >
-                  {/* Header Row: Status & Date Created */}
                   <div className="flex items-center justify-between mb-4">
                     {renderStatusBadge(exam.status)}
                     <span className="text-xs text-gray-400 font-medium flex items-center gap-1">
@@ -284,9 +285,7 @@ const handleToggleOptions = async (patch) => {
                       {exam.createdAt || 'Recently'}
                     </span>
                   </div>
-                 
 
-                  {/* Subject & Title */}
                   <div className="mb-4">
                     <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
                       {exam.subject}
@@ -296,7 +295,6 @@ const handleToggleOptions = async (patch) => {
                     </h3>
                   </div>
 
-                  {/* Quick Info Grid */}
                   <div className="grid grid-cols-1 gap-3 mb-5">
                     <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-100">
                       <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider block">Class &amp; arms</span>
@@ -306,7 +304,6 @@ const handleToggleOptions = async (patch) => {
                     </div>
                   </div>
 
-                  {/* Footer: Action */}
                   <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                     <span className="text-xs text-gray-500">
                       {exam.totalQuestions} Questions
@@ -320,7 +317,6 @@ const handleToggleOptions = async (patch) => {
               ))}
             </div>
           ) : (
-            /* --- EMPTY STATE --- */
             <div className="py-16 flex flex-col items-center justify-center text-center px-4">
               <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
                 <Search className="w-5 h-5 text-gray-400" />
@@ -337,22 +333,19 @@ const handleToggleOptions = async (patch) => {
               </button>
             </div>
           )}
-
         </div>
       )}
-     {/* SEt exam */}
-     {activeTab === 'questions' && <QuestionImport exam={selectedExam} onChanged={loadExams} />}
-     
+
+      {activeTab === 'questions' && <QuestionImport exam={selectedExam} onChanged={loadExams} />}
+
       {/* --- MODAL: EXAM CONFIG DETAILS --- */}
-      <Modal 
-        open={isModalOpen} 
-        onClose={handleCloseModal} 
+      <Modal
+        open={isModalOpen}
+        onClose={handleCloseModal}
         title="Exam Configuration Details"
       >
         {selectedExam && (
           <div className="space-y-6 pt-2">
-            
-            {/* Header inside modal */}
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
@@ -364,11 +357,13 @@ const handleToggleOptions = async (patch) => {
               </div>
               {renderStatusBadge(selectedExam.status)}
             </div>
-            {
-              
-            }
-       
-            {/* Details Grid */}
+
+            {modalError && (
+              <div className="text-xs text-red-700 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                {modalError}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                 <div className="flex items-center gap-2 mb-1">
@@ -408,9 +403,7 @@ const handleToggleOptions = async (patch) => {
                 <span className="text-sm font-semibold text-gray-900">{selectedExam.percentageMark}</span>
               </div>
             </div>
-          
 
-            {/* Dates */}
             <div className="flex items-center justify-between text-xs text-gray-500 bg-gray-50 rounded-lg p-3 border border-gray-100">
               <span>Created: {selectedExam.createdAt || 'N/A'}</span>
               <span>Exam Date: {selectedExam.date || 'N/A'}</span>
@@ -420,25 +413,44 @@ const handleToggleOptions = async (patch) => {
               <span>Questions uploaded: {selectedExam.uploadedQuestions} / {selectedExam.totalQuestions}</span>
               <span>Time: {selectedExam.time}</span>
             </div>
+
             <div className="flex items-center justify-between gap-3 text-xs">
               <button onClick={handleToggleOpen} className="text-blue-600 hover:underline">
                 {selectedExam.openExam ? 'Close exam (follow schedule)' : 'Open exam now'}
               </button>
               <button onClick={handleDeleteExam} className="text-red-600 hover:underline">Delete exam</button>
             </div>
-<div className="flex items-center justify-between text-xs bg-gray-50 rounded-lg p-3 border border-gray-100">
-  <span>Passage mode</span>
-  <button onClick={() => handleToggleOptions({ passage: !selectedExam.passage })} className="text-blue-600 hover:underline">
-    {selectedExam.passage ? 'On' : 'Off'}
-  </button>
-</div>
-<div className="flex items-center justify-between text-xs bg-gray-50 rounded-lg p-3 border border-gray-100">
-  <span>True/False mode</span>
-  <button onClick={() => handleToggleOptions({ trueOrFalse: !selectedExam.trueOrFalse })} className="text-blue-600 hover:underline">
-    {selectedExam.trueOrFalse ? 'On' : 'Off'}
-  </button>
-</div>
-            {/* --- ACTION BUTTONS --- */}
+
+            <div className="flex items-center justify-between text-xs bg-gray-50 rounded-lg p-3 border border-gray-100">
+              <span>Passage mode</span>
+              <button
+                onClick={() => handleToggleOptions({ passage: !selectedExam.passage })}
+                disabled={toggleDisabled}
+                title={toggleDisabled ? 'Cannot change once students have started.' : undefined}
+                className="text-blue-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+              >
+                {selectedExam.passage ? 'On' : 'Off'}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between text-xs bg-gray-50 rounded-lg p-3 border border-gray-100">
+              <span>True/False mode</span>
+              <button
+                onClick={() => handleToggleOptions({ trueOrFalse: !selectedExam.trueOrFalse })}
+                disabled={toggleDisabled}
+                title={toggleDisabled ? 'Cannot change once students have started.' : undefined}
+                className="text-blue-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+              >
+                {selectedExam.trueOrFalse ? 'On' : 'Off'}
+              </button>
+            </div>
+
+            {toggleDisabled && (
+              <p className="text-[11px] text-amber-600">
+                Passage / True/False mode is locked because students have already started this exam.
+              </p>
+            )}
+
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={handleCloseModal}
@@ -454,13 +466,13 @@ const handleToggleOptions = async (patch) => {
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-
           </div>
         )}
       </Modal>
-       <Modal open={openConfig} onClose={handleCloseConfig} title='Set Exam Config' size='max-w-4xl lg:ml-64' >
-               <SetConfig  saveConfig = {handleSetExam}  onClose={handleCloseConfig}/>
-                  </Modal>
+
+      <Modal open={openConfig} onClose={handleCloseConfig} title="Set Exam Config" size="max-w-4xl lg:ml-64">
+        <SetConfig saveConfig={handleSetExam} onClose={handleCloseConfig} />
+      </Modal>
     </div>
   );
 }
