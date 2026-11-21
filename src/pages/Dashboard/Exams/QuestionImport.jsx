@@ -282,7 +282,7 @@ export default function QuestionImport({ exam: examProp, onChanged }) {
             <label className="text-xs font-medium text-gray-600">Adding questions to:</label>
             <select className="ml-2 border rounded-md px-2 py-1 text-sm" value={activePassageUid} onChange={(e) => setActivePassageUid(e.target.value)}>
               <option value="">Standalone question (no passage)</option>
-              {passages.map((p) => <option key={p.uid} value={p.uid}>{p.title || `Passage ${p.uid}`}</option>)}
+              {passages.map((p) => <option className='break-words' key={p.uid} value={p.uid}>{p.title || `Passage ${p.uid}`}</option>)}
             </select>
           </div>
         </section>
@@ -361,7 +361,7 @@ export default function QuestionImport({ exam: examProp, onChanged }) {
                 <label className="block text-xs font-medium text-gray-600 mb-1">Attach to passage</label>
                 <select className="border rounded-md px-2 py-1 text-sm" value={activePassageUid} onChange={(e) => setActivePassageUid(e.target.value)}>
                   <option value="">Standalone (no passage)</option>
-                  {passages.map((p) => <option key={p.uid} value={p.uid}>{p.title || `Passage ${p.uid}`}</option>)}
+                  {passages.map((p) => <option className='break-words' key={p.uid} value={p.uid}>{p.title || `Passage ${p.uid}`}</option>)}
                 </select>
               </div>
             )}
