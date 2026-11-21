@@ -280,7 +280,7 @@ export default function QuestionImport({ exam: examProp, onChanged }) {
           </div>
           <div className="mt-3">
             <label className="text-xs font-medium text-gray-600">Adding questions to:</label>
-            <select className="ml-2 border rounded-md px-2 py-1 text-sm" value={activePassageUid} onChange={(e) => setActivePassageUid(e.target.value)}>
+            <select className="ml-2 border rounded-md px-2 py-1 text-sm w-full" value={activePassageUid} onChange={(e) => setActivePassageUid(e.target.value)}>
               <option value="">Standalone question (no passage)</option>
               {passages.map((p) => <option className='break-words' key={p.uid} value={p.uid}>{p.title || `Passage ${p.uid.slice(0, 5)}`}</option>)}
             </select>
@@ -359,7 +359,7 @@ export default function QuestionImport({ exam: examProp, onChanged }) {
             {!theoryExam && passageOn && passages.length > 0 && (
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Attach to passage</label>
-                <select className="border rounded-md px-2 py-1 text-sm" value={activePassageUid} onChange={(e) => setActivePassageUid(e.target.value)}>
+                <select className="border rounded-md px-2 py-1 text-sm w-full" value={activePassageUid} onChange={(e) => setActivePassageUid(e.target.value)}>
                   <option value="">Standalone (no passage)</option>
                   {passages.map((p) => <option className='break-words' key={p.uid} value={p.uid}>{p.title || `Passage ${p.uid.slice(0, 5)}`}</option>)}
                 </select>
